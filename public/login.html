@@ -7,17 +7,36 @@
 </head>
 <body class="login-page">
 
-  <div class="login-card glass">
-    <h2>Login ASMA</h2>
+<form onsubmit="login(event)">
+  <input type="text" id="username" placeholder="Username" required />
+  <input type="password" id="password" placeholder="Password" required />
+  <button type="submit">Login</button>
+</form>
 
-    <input id="username" placeholder="Username">
-    <input id="password" type="password" placeholder="Password">
+<script>
+async function login(e) {
+  e.preventDefault();
 
-    <button id="btn-login">Masuk</button>
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
-    <p id="login-error"></p>
-  </div>
+  const res = await fetch("/api/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ username, password })
+  });
 
-  <script src="js/login.js"></script>
+  const data = await res.json();
+
+  if (data.success) {
+    localStorage.setItem("asmaLogin", "true");
+    window.location.href = "/";
+  } else {
+    alert("Login gagal");
+  }
+}
+</script>
 </body>
 </html>

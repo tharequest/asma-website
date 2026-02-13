@@ -1,3 +1,7 @@
+if (!localStorage.getItem("asmaLogin")) {
+  window.location.href = "/login.html";
+}
+
 console.log("ASMA Web UI Ready 🌐");
 
 // ===============================
