@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import crypto from "crypto";
 
 function getAuth() {
   const sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
@@ -8,6 +9,10 @@ function getAuth() {
     sa.private_key,
     ["https://www.googleapis.com/auth/spreadsheets.readonly"]
   );
+}
+
+function sha256(text) {
+  return crypto.createHash("sha256").update(text).digest("hex");
 }
 
 export default async function handler(req, res) {
@@ -24,17 +29,19 @@ export default async function handler(req, res) {
     });
 
     const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `user!A:B`
+      spreadsheetId: process.env.GOOGLE_USER_SHEET_ID,
+      range: `user!A:C`
     });
 
     const rows = response.data.values || [];
 
-    const found = rows.find(
-      r => r[0] === username && r[1] === password
+    const hashed = sha256(password);
+
+    const user = rows.find(
+      r => r[0] === username && r[1] === hashed
     );
 
-    if (!found) {
+    if (!user) {
       return res.json({ success: false });
     }
 
