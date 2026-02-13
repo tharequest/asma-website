@@ -7,7 +7,8 @@ function getSheets() {
     sa.client_email,
     null,
     sa.private_key,
-    ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+    ["https://www.googleapis.com/auth/spreadsheets",
+     "https://www.googleapis.com/auth/drive"]
   );
 
   return google.sheets({ version: "v4", auth });

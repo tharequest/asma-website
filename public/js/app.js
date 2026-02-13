@@ -133,7 +133,9 @@ if (rows.length > 8) {
           <td>${i + 1}</td>
           <td>${r.nama}</td>
           <td>${r.nim}</td>
-          <td><a class="link" href="${r.link}" target="_blank">Lihat Surat</a></td>
+          <td><a class="link" href="${r.link}" target="_blank">Lihat</a>
+          <button onclick="hapusData(${i + 1}, '${r.link}')" class="btn-delete">Hapus</button>
+          </td>
           ${jenisWithYear.includes(currentJenis) ? `<td>${r.tahun || "-"}</td>` : ""}
         </tr>
       `).join("");
@@ -265,3 +267,27 @@ document.querySelectorAll(".nav-item").forEach(item => {
 // ===============================
 loadTable();
 setStatus("Siap.");
+
+//fungsi hapus
+async function hapusData(rowIndex, link) {
+  if (!confirm("Yakin mau hapus surat ini?")) return;
+
+  const res = await fetch("/api/delete", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      jenis: currentJenis,
+      rowIndex: rowIndex,
+      link: link
+    })
+  });
+
+  const json = await res.json();
+
+  if (json.success) {
+    alert("Berhasil dihapus");
+    loadTable();
+  } else {
+    alert("Gagal hapus");
+  }
+}
