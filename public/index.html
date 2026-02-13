@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload Surat Mahasiswa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/nav.css" />
+  <link rel="icon" type="image/png" href="/img/faviconlogo.png">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- HEADER -->
+    <header class="app-header glass">
+      <div class="header-left">
+  <img src="img/logonew.png" class="app-logo" alt="ASMA Logo">
+  <div class="header-text">
+    <div class="app-title">ASMA</div>
+    <div class="app-subtitle">Aplikasi Surat Mahasiswa ©versi 01</div>
+  </div>
+</div>
+   <div class="header-right">
+        <div class="datetime" id="datetime"></div>
+      </div>
+    </header>
+
+    <!-- MAIN CARD -->
+    <main class="app-main">
+      <section class="card glass">
+        <div class="card-header">
+          <div>
+            <h2 id="card-title">Surat Aktif Kuliah</h2>
+            <p id="card-subtitle">Sheet: <span id="sheet-label">aktif_kuliah</span></p>
+          </div>
+          <div class="status-pill" id="status-pill">Siap</div>
+        </div>
+
+        <!-- SEARCH -->
+        <div class="search-wrapper">
+          <input type="text" id="searchInput" placeholder="Cari nama / NIM...">
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-container">
+          <table>
+            <thead>
+  <tr id="table-header"></tr>
+</thead>
+            <tbody id="table-body">
+              <tr><td colspan="4" class="empty-row">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- FILE ACTIONS -->
+       <div class="actions-row">
+
+  <div class="select-wrapper" style="display:none;">
+    <select id="tahun-select" class="tahun-select">
+      <option value="">Pilih Tahun</option>
+      <option value="2024">2024</option>
+      <option value="2025">2025</option>
+      <option value="2026">2026</option>
+    </select>
+    <span class="select-arrow">▾</span>
+  </div>
+          <input type="file" id="file-input" multiple accept="application/pdf" hidden />
+          <button class="btn btn-ghost" id="btn-choose" type="button">
+            <span class="material-icons-round btn-icon">folder_open</span>Pilih File
+          </button>
+          <button class="btn btn-accent" id="btn-upload" type="button" disabled>
+            <span class="material-icons-round btn-icon">cloud_upload</span>Upload
+          </button>
+
+          <div class="file-info" id="file-info">Belum ada file dipilih.</div>
+        </div>
+
+        <!-- 🔔 UPLOAD SUMMARY -->
+        <div id="upload-summary" class="upload-summary" style="display:none;"></div>
+
+        <!-- PROGRESS -->
+        <div class="status-bar" id="status-bar">Status: siap.</div>
+      </section>
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+  <div class="nav-item active" data-jenis="aktif_kuliah" data-label="Surat Aktif Kuliah">
+  <span class="material-icons-round">home</span>
+</div>
+
+<div class="nav-item" data-jenis="ket_lulus" data-label="Surat Keterangan Lulus">
+  <span class="material-icons-round">school</span>
+</div>
+
+<div class="nav-item" data-jenis="cuti_kuliah" data-label="Surat Cuti">
+  <span class="material-icons-round">article</span>
+</div>
+
+<div class="nav-item" data-jenis="undur_diri" data-label="Surat Pengunduran Diri">
+  <span class="material-icons-round">logout</span>
+</div>
+
+<div class="nav-item" data-jenis="pindah_kuliah" data-label="Surat Pindah">
+  <span class="material-icons-round">sync_alt</span>
+</div>
+</nav>
+</div>
+
+  
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div class="rubik-loader">
+    <div></div><div></div><div></div>
+    <div></div><div></div><div></div>
+    <div></div><div></div><div></div>
+  </div>
+</div>
+
+
+  
+  <script src="js/app.js"></script>
+  <script src="js/search.js"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+/* ===========================
+   BOTTOM NAVIGATION - ICON ONLY
+   =========================== */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 52%;
+  height: 75px;
+  background: #ffffffee;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 40px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  z-index: 999;
+}
+
+.nav-item {
+  position: relative;
+  width: 58px;
+  text-align: center;
+  cursor: pointer;
+  padding: 10px 0;
+  border-radius: 16px;
+  color: #4b5563;
+  transition: .25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ICON */
+.nav-item .material-icons-round {
+  font-size: 26px;
+  opacity: .8;
+  transition: .2s ease;
+}
+
+/* TOOLTIP */
+.nav-item::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: 55px; /* muncul di atas icon */
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: #1f2937;
+  color: #fff;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  opacity: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: .2s ease;
+  box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+
+/* Hover: tooltip muncul */
+.nav-item:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0px);
+}
+
+/* Hover effect */
+.nav-item:hover .material-icons-round {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* ACTIVE */
+.nav-item.active {
+  background: #2563eb;
+  color: #fff;
+  transform: translateY(-14px);
+  box-shadow: 0 10px 26px rgba(37,99,235,.45);
+}
+
+.nav-item.active .material-icons-round {
+  opacity: 1;
+}

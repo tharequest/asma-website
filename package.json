@@ -1,0 +1,10 @@
+{
+  "name": "asma-website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "googleapis": "^133.0.0",
+    "pdf-parse": "^1.1.1"
+  }
+}
