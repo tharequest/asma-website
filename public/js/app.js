@@ -295,3 +295,8 @@ async function hapusData(rowIndex, link) {
     alert("Gagal hapus");
   }
 }
+//untuk keluar
+function logout() {
+  localStorage.removeItem("asmaLogin");
+  window.location.href = "/login.html";
+}
