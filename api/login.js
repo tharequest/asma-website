@@ -1,18 +1,14 @@
 import { google } from "googleapis";
-import crypto from "crypto";
 
 function getAuth() {
   const sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+
   return new google.auth.JWT(
     sa.client_email,
     null,
     sa.private_key,
     ["https://www.googleapis.com/auth/spreadsheets.readonly"]
   );
-}
-
-function sha256(text) {
-  return crypto.createHash("sha256").update(text).digest("hex");
 }
 
 export default async function handler(req, res) {
@@ -22,6 +18,10 @@ export default async function handler(req, res) {
     }
 
     const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.json({ success: false });
+    }
 
     const sheets = google.sheets({
       version: "v4",
@@ -35,10 +35,11 @@ export default async function handler(req, res) {
 
     const rows = response.data.values || [];
 
-    const hashed = sha256(password);
+    // Lewati header (baris pertama)
+    const users = rows.slice(1);
 
-    const user = rows.find(
-      r => r[0] === username && r[1] === hashed
+    const user = users.find(
+      r => r[0] === username && r[1] === password
     );
 
     if (!user) {
