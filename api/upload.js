@@ -44,7 +44,7 @@ function getDriveFolder(jenis) {
 // ===============================
 // 🔍 PARSER NAMA & NIM (CERDAS)
 // ===============================
-//tambahan ni gess  dari chatgpt katanya taruh di atas function extranamadannim wkowkowk
+//tambahan ni gess taruh di atas function extranamadannim wkowkowk
 function toProperCase(str) {
   return str
     .toLowerCase()
