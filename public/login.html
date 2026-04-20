@@ -140,6 +140,23 @@ html, body {
   text-align: center;
   line-height: 1.6;
 }
+.subtitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.subtitle img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
 
 /* ===== DIVIDER ===== */
 .divider {
@@ -275,7 +292,13 @@ input:focus {
         <img src="img/logo.svg" alt="ASMA">
       </div>
       <h1>ASMA</h1>
-      <p>Aplikasi Surat Mahasiswa<br>Sistem Akademik Terpadu</p>
+      <div class="subtitle">
+  <img src="img/faviconlogo.png" alt="UNTAN">
+  <div>
+    Aplikasi Surat Mahasiswa<br>
+    Sistem Akademik Terpadu
+  </div>
+</div>
     </div>
 
     <div class="divider"></div>
