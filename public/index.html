@@ -2,126 +2,189 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Upload Surat Mahasiswa</title>
+  <title>ASMA — Aplikasi Surat Mahasiswa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/nav.css" />
-  <link rel="icon" type="image/png" href="/img/faviconlogo.png">
+  <link rel="icon" type="image/svg+xml" href="img/logo.svg">
 </head>
 <body>
-  <div class="app-shell">
-    <!-- HEADER -->
-    <header class="app-header glass">
-      <div class="header-left">
-  <img src="img/logonew.png" class="app-logo" alt="ASMA Logo">
-  <div class="header-text">
-    <div class="app-title">ASMA</div>
-    <div class="app-subtitle">Aplikasi Surat Mahasiswa ©versi 01</div>
+
+  <!-- ANIMATED BG BLOBS -->
+  <div class="bg-scene">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+    <div class="noise-overlay"></div>
   </div>
-</div>
-   <div class="header-right">
-        <button onclick="logout()">Logout</button>
-        <div class="datetime" id="datetime"></div>
+
+  <div class="app-shell">
+
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-wrap">
+          <img src="img/logo.svg" class="app-logo" alt="ASMA Logo">
+        </div>
+        <div class="header-text">
+          <div class="app-title">ASMA</div>
+          <div class="app-subtitle">Aplikasi Surat Mahasiswa <span class="version-tag">v1.0</span></div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="datetime-wrap">
+          <span class="material-icons-round dt-icon">schedule</span>
+          <div class="datetime" id="datetime"></div>
+        </div>
+        <button class="btn-logout" onclick="logout()">
+          <span class="material-icons-round">logout</span>
+        </button>
       </div>
     </header>
 
     <!-- MAIN CARD -->
     <main class="app-main">
-      <section class="card glass">
+      <section class="card">
+
+        <!-- CARD HEADER -->
         <div class="card-header">
-          <div>
-            <h2 id="card-title">Surat Aktif Kuliah</h2>
-            <p id="card-subtitle">Sheet: <span id="sheet-label">aktif_kuliah</span></p>
+          <div class="card-title-group">
+            <div class="card-icon-wrap" id="card-icon">
+              <span class="material-icons-round">home_work</span>
+            </div>
+            <div>
+              <h2 id="card-title">Surat Aktif Kuliah</h2>
+              <p id="card-subtitle">Sheet: <span id="sheet-label" class="sheet-chip">aktif_kuliah</span></p>
+            </div>
           </div>
-          <div class="status-pill" id="status-pill">Siap</div>
+          <div class="status-pill" id="status-pill">
+            <span class="status-dot"></span>Siap
+          </div>
         </div>
 
         <!-- SEARCH -->
         <div class="search-wrapper">
-          <input type="text" id="searchInput" placeholder="Cari nama / NIM...">
+          <span class="material-icons-round search-icon">search</span>
+          <input type="text" id="searchInput" placeholder="Cari nama atau NIM mahasiswa...">
         </div>
 
         <!-- TABLE -->
         <div class="table-container">
           <table>
             <thead>
-  <tr id="table-header"></tr>
-</thead>
+              <tr id="table-header"></tr>
+            </thead>
             <tbody id="table-body">
-              <tr><td colspan="4" class="empty-row">Memuat data...</td></tr>
+              <tr><td colspan="4" class="empty-row">
+                <span class="material-icons-round" style="font-size:32px;opacity:0.25;display:block;margin-bottom:8px;">hourglass_top</span>
+                Memuat data...
+              </td></tr>
             </tbody>
           </table>
         </div>
 
         <!-- FILE ACTIONS -->
-       <div class="actions-row">
+        <div class="actions-row">
+          <div class="select-wrapper" style="display:none;">
+            <span class="material-icons-round select-prefix-icon">calendar_today</span>
+            <select id="tahun-select" class="tahun-select">
+              <option value="">Pilih Tahun</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
 
-  <div class="select-wrapper" style="display:none;">
-    <select id="tahun-select" class="tahun-select">
-      <option value="">Pilih Tahun</option>
-      <option value="2024">2024</option>
-      <option value="2025">2025</option>
-      <option value="2026">2026</option>
-    </select>
-    <span class="select-arrow">▾</span>
-  </div>
           <input type="file" id="file-input" multiple accept="application/pdf" hidden />
+
           <button class="btn btn-ghost" id="btn-choose" type="button">
-            <span class="material-icons-round btn-icon">folder_open</span>Pilih File
+            <span class="material-icons-round btn-icon">folder_open</span>
+            Pilih File
           </button>
           <button class="btn btn-accent" id="btn-upload" type="button" disabled>
-            <span class="material-icons-round btn-icon">cloud_upload</span>Upload
+            <span class="material-icons-round btn-icon">cloud_upload</span>
+            Upload
           </button>
 
-          <div class="file-info" id="file-info">Belum ada file dipilih.</div>
+          <div class="file-info" id="file-info">
+            <span class="material-icons-round" style="font-size:14px;vertical-align:middle">attach_file</span>
+            Belum ada file dipilih.
+          </div>
         </div>
 
-        <!-- 🔔 UPLOAD SUMMARY -->
+        <!-- UPLOAD SUMMARY -->
         <div id="upload-summary" class="upload-summary" style="display:none;"></div>
 
-        <!-- PROGRESS -->
-        <div class="status-bar" id="status-bar">Status: siap.</div>
+        <!-- STATUS BAR -->
+        <div class="status-bar" id="status-bar">
+          <span class="material-icons-round" style="font-size:13px;vertical-align:middle">info</span>
+          Status: siap.
+        </div>
+
       </section>
     </main>
 
     <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
-  <div class="nav-item active" data-jenis="aktif_kuliah" data-label="Surat Aktif Kuliah">
-  <span class="material-icons-round">home</span>
-</div>
-
-<div class="nav-item" data-jenis="ket_lulus" data-label="Surat Keterangan Lulus">
-  <span class="material-icons-round">school</span>
-</div>
-
-<div class="nav-item" data-jenis="cuti_kuliah" data-label="Surat Cuti">
-  <span class="material-icons-round">article</span>
-</div>
-
-<div class="nav-item" data-jenis="undur_diri" data-label="Surat Pengunduran Diri">
-  <span class="material-icons-round">logout</span>
-</div>
-
-<div class="nav-item" data-jenis="pindah_kuliah" data-label="Surat Pindah">
-  <span class="material-icons-round">sync_alt</span>
-</div>
-</nav>
-</div>
-
-  
-
-<!-- LOADING OVERLAY -->
-<div id="loading-overlay">
-  <div class="rubik-loader">
-    <div></div><div></div><div></div>
-    <div></div><div></div><div></div>
-    <div></div><div></div><div></div>
+      <div class="nav-item active" data-jenis="aktif_kuliah" data-label="Surat Aktif Kuliah">
+        <span class="material-icons-round">home_work</span>
+        <span class="nav-label">Aktif</span>
+      </div>
+      <div class="nav-item" data-jenis="ket_lulus" data-label="Surat Keterangan Lulus">
+        <span class="material-icons-round">workspace_premium</span>
+        <span class="nav-label">Lulus</span>
+      </div>
+      <div class="nav-item" data-jenis="cuti_kuliah" data-label="Surat Cuti">
+        <span class="material-icons-round">event_busy</span>
+        <span class="nav-label">Cuti</span>
+      </div>
+      <div class="nav-item" data-jenis="undur_diri" data-label="Surat Pengunduran Diri">
+        <span class="material-icons-round">exit_to_app</span>
+        <span class="nav-label">Undur</span>
+      </div>
+      <div class="nav-item" data-jenis="pindah_kuliah" data-label="Surat Pindah">
+        <span class="material-icons-round">transfer_within_a_station</span>
+        <span class="nav-label">Pindah</span>
+      </div>
+    </nav>
   </div>
-</div>
 
+  <!-- LOADING OVERLAY -->
+  <div id="loading-overlay">
+    <div class="loader-wrap">
+      <div class="lung-loader">
+        <svg viewBox="0 0 60 50" fill="none" xmlns="http://www.w3.org/2000/svg" class="lung-svg">
+          <path d="M30 5 C30 5 18 9 14 20 C10 31 12 42 18 44 C24 46 28 41 29 36 C30 31 30 18 30 5Z" fill="url(#ll)" opacity="0.9"/>
+          <path d="M30 5 C30 5 42 9 46 20 C50 31 48 42 42 44 C36 46 32 41 31 36 C30 31 30 18 30 5Z" fill="url(#lr)" opacity="0.9"/>
+          <rect x="27.5" y="1" width="5" height="7" rx="2.5" fill="#60a5fa"/>
+          <defs>
+            <linearGradient id="ll" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#2563eb" stop-opacity="0.6"/>
+            </linearGradient>
+            <linearGradient id="lr" x1="1" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#818cf8" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#2563eb" stop-opacity="0.6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="pdf-particles">
+          <div class="pdf-dot d1"></div>
+          <div class="pdf-dot d2"></div>
+          <div class="pdf-dot d3"></div>
+          <div class="pdf-dot d4"></div>
+        </div>
+      </div>
+      <p class="loader-text">Memuat data...</p>
+    </div>
+  </div>
 
-  
   <script src="js/app.js"></script>
   <script src="js/search.js"></script>
 </body>

@@ -3,153 +3,362 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login ASMA</title>
+<title>Login — ASMA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="img/logo.svg">
 
 <style>
-*{
-  box-sizing:border-box;
-  font-family: "Segoe UI", sans-serif;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent:      #2563eb;
+  --accent-2:    #0ea5e9;
+  --text-primary: #1e293b;
+  --text-muted:   #94a3b8;
 }
 
-body{
-  margin:0;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background: linear-gradient(135deg,#0f172a,#1e293b);
+html, body {
+  min-height: 100vh;
+  font-family: 'Outfit', system-ui, sans-serif;
+  background: #f0f4ff;
+  color: var(--text-primary);
+  overflow: hidden;
 }
 
-.card{
-  width:360px;
-  padding:40px;
-  border-radius:20px;
-
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-
-  border:1px solid rgba(255,255,255,0.15);
-  box-shadow:0 10px 40px rgba(0,0,0,0.4);
-
-  color:white;
+/* ===== BG ===== */
+.bg-scene {
+  position: fixed; inset: 0;
+  background: linear-gradient(145deg, #f0f4ff 0%, #e8eeff 40%, #f5f0ff 80%, #eef6ff 100%);
+  overflow: hidden;
 }
 
-.card h2{
-  text-align:center;
-  margin-bottom:30px;
-  font-weight:600;
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.6;
+  animation: blobFloat 15s ease-in-out infinite;
+}
+.b1 { width:460px;height:460px;background:radial-gradient(rgba(147,197,253,0.65),transparent);top:-150px;left:-80px;animation-delay:0s; }
+.b2 { width:360px;height:360px;background:radial-gradient(rgba(196,181,253,0.55),transparent);bottom:-100px;right:-60px;animation-delay:-7s; }
+.b3 { width:240px;height:240px;background:radial-gradient(rgba(125,211,252,0.45),transparent);top:45%;left:58%;animation-delay:-12s; }
+.b4 { width:180px;height:180px;background:radial-gradient(rgba(167,243,208,0.4),transparent);top:20%;right:10%;animation-delay:-4s; }
+
+@keyframes blobFloat {
+  0%,100%{ transform:translate(0,0) scale(1); }
+  40%{ transform:translate(22px,-32px) scale(1.06); }
+  70%{ transform:translate(-14px,14px) scale(0.96); }
 }
 
-.form-group{
-  margin-bottom:20px;
+/* ===== CENTER ===== */
+.center-wrap {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
 }
 
-label{
-  display:block;
-  font-size:14px;
-  margin-bottom:8px;
-  opacity:0.8;
+/* ===== LOGIN CARD ===== */
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 28px;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  box-shadow:
+    0 24px 60px rgba(37, 99, 235, 0.12),
+    0 8px 24px rgba(0,0,0,0.06),
+    0 1px 0 rgba(255,255,255,1) inset;
+  padding: 40px 36px;
+  position: relative;
+  animation: cardIn .6s cubic-bezier(.34,1.56,.64,1) both;
 }
 
-input{
-  width:100%;
-  padding:12px 14px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.1);
-  color:white;
-  outline:none;
-  transition:0.3s;
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-input::placeholder{
-  color:rgba(255,255,255,0.6);
+/* Top color line */
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 15%; right: 15%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #2563eb, #0ea5e9, transparent);
+  border-radius: 0 0 4px 4px;
+  border-top: none;
 }
 
-input:focus{
-  border:1px solid #3b82f6;
-  box-shadow:0 0 10px rgba(59,130,246,0.6);
+/* ===== LOGO AREA ===== */
+.logo-area {
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 28px;
+  gap: 12px;
 }
 
-button{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  background: linear-gradient(90deg,#2563eb,#3b82f6);
-  color:white;
-  font-weight:600;
-  cursor:pointer;
-  transition:0.3s;
+.logo-circle {
+  width: 80px; height: 80px;
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(37,99,235,0.1), rgba(14,165,233,0.07));
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  display: flex; align-items: center; justify-content: center;
+  padding: 14px;
+  box-shadow: 0 8px 28px rgba(37,99,235,0.15), 0 2px 8px rgba(0,0,0,0.06);
+  animation: logoGlow 3s ease-in-out infinite;
 }
 
-button:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 20px rgba(37,99,235,0.6);
+@keyframes logoGlow {
+  0%,100%{ box-shadow:0 8px 24px rgba(37,99,235,0.12),0 2px 8px rgba(0,0,0,0.06); }
+  50%    { box-shadow:0 10px 32px rgba(37,99,235,0.22),0 4px 12px rgba(0,0,0,0.08); }
 }
 
-.footer-text{
-  text-align:center;
-  margin-top:15px;
-  font-size:13px;
-  opacity:0.7;
+.logo-circle img {
+  width: 52px; height: 52px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(37,99,235,0.35));
 }
 
-.footer-text a{
-  color:#60a5fa;
-  text-decoration:none;
+.logo-area h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  background: linear-gradient(90deg, #1e293b 0%, #2563eb 60%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
+
+.logo-area p {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ===== DIVIDER ===== */
+.divider {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(37,99,235,0.15), transparent);
+  margin-bottom: 24px;
+}
+
+/* ===== FORM ===== */
+.form-group { margin-bottom: 16px; }
+
+label {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 7px;
+}
+label .material-icons-round { font-size: 14px; color: var(--accent); }
+
+input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: all .25s ease;
+  box-shadow: 0 2px 6px rgba(37,99,235,0.05);
+}
+
+input::placeholder { color: #cbd5e1; }
+
+input:focus {
+  border-color: rgba(37,99,235,0.45);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.09), 0 2px 12px rgba(37,99,235,0.08);
+}
+
+/* ===== BUTTON ===== */
+.btn-login {
+  width: 100%;
+  padding: 13px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+  color: white;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all .25s ease;
+  box-shadow: 0 8px 24px rgba(37,99,235,0.35), 0 1px 0 rgba(255,255,255,0.2) inset;
+  margin-top: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-login::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left .5s ease;
+}
+
+.btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(37,99,235,0.45);
+}
+.btn-login:hover::before { left: 100%; }
+.btn-login:active { transform: translateY(0); }
+
+/* ===== FOOTER ===== */
+.login-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.login-footer .material-icons-round { font-size: 13px; color: #10b981; }
+
+/* ===== ERROR ===== */
+@keyframes shake {
+  0%,100%{ transform:translateX(0); }
+  20%{ transform:translateX(-7px); }
+  40%{ transform:translateX(7px); }
+  60%{ transform:translateX(-4px); }
+  80%{ transform:translateX(4px); }
+}
+.shake { animation: shake .4s ease; }
+
+.input-error {
+  border-color: rgba(239,68,68,0.45) !important;
+  background: rgba(254,242,242,0.9) !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.08) !important;
+}
+
+.error-msg {
+  font-size: 11.5px;
+  color: #dc2626;
+  margin-top: 6px;
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+.error-msg.show { display: flex; }
+.error-msg .material-icons-round { font-size: 13px; }
 </style>
 </head>
 
 <body>
+<div class="bg-scene">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="blob b4"></div>
+</div>
 
-<div class="card">
-  <h2>Login</h2>
+<div class="center-wrap">
+  <div class="login-card">
 
-  <form onsubmit="login(event)">
-    <div class="form-group">
-      <label>Username</label>
-      <input type="text" id="username" placeholder="Masukkan username" required>
+    <div class="logo-area">
+      <div class="logo-circle">
+        <img src="img/logo.svg" alt="ASMA">
+      </div>
+      <h1>ASMA</h1>
+      <p>Aplikasi Surat Mahasiswa<br>Sistem Akademik Terpadu</p>
     </div>
 
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="password" placeholder="Masukkan password" required>
+    <div class="divider"></div>
+
+    <form onsubmit="login(event)">
+      <div class="form-group">
+        <label>
+          <span class="material-icons-round">person</span>
+          Username
+        </label>
+        <input type="text" id="username" placeholder="Masukkan username" required autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label>
+          <span class="material-icons-round">lock</span>
+          Password
+        </label>
+        <input type="password" id="password" placeholder="Masukkan password" required autocomplete="current-password">
+        <div class="error-msg" id="error-msg">
+          <span class="material-icons-round">error_outline</span>
+          Username atau password salah.
+        </div>
+      </div>
+
+      <button type="submit" class="btn-login" id="btn-login">Masuk ke ASMA</button>
+    </form>
+
+    <div class="login-footer">
+      <span class="material-icons-round">verified_user</span>
+      Akses terbatas untuk pengelola akademik
     </div>
-
-    <button type="submit">Login</button>
-  </form>
-
-  <div class="footer-text">
-    Sistem Akademik Surat Mahasiswa
   </div>
 </div>
 
 <script>
-async function login(e){
+async function login(e) {
   e.preventDefault();
-
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
+  const btn      = document.getElementById("btn-login");
+  const errMsg   = document.getElementById("error-msg");
 
-  const res = await fetch("/api/login",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({username,password})
-  });
+  btn.disabled = true;
+  btn.textContent = "Memverifikasi...";
+  errMsg.classList.remove("show");
 
-  const data = await res.json();
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
 
-  if(data.success){
-    localStorage.setItem("asmaLogin","true");
-    window.location.href="/";
-  }else{
-    alert("Login gagal");
+    if (data.success) {
+      btn.textContent = "✓ Berhasil!";
+      btn.style.background = "linear-gradient(135deg, #059669, #34d399)";
+      localStorage.setItem("asmaLogin", "true");
+      setTimeout(() => { window.location.href = "/"; }, 600);
+    } else {
+      const card = document.querySelector(".login-card");
+      card.classList.remove("shake");
+      void card.offsetWidth;
+      card.classList.add("shake");
+      document.getElementById("username").classList.add("input-error");
+      document.getElementById("password").classList.add("input-error");
+      errMsg.classList.add("show");
+      btn.disabled = false;
+      btn.textContent = "Masuk ke ASMA";
+    }
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = "Masuk ke ASMA";
   }
+
+  ["username","password"].forEach(id => {
+    document.getElementById(id).addEventListener("input", () => {
+      document.getElementById(id).classList.remove("input-error");
+      errMsg.classList.remove("show");
+    }, { once: true });
+  });
 }
 </script>
-
 </body>
 </html>
