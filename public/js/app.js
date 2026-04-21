@@ -253,6 +253,17 @@ document.querySelectorAll(".nav-item").forEach(item => {
     document.getElementById("card-title").textContent =
       item.dataset.label || "Judul";
 
+    // Update sidebar icon
+    const iconMap = {
+      aktif_kuliah: "home_work",
+      ket_lulus: "workspace_premium",
+      cuti_kuliah: "event_busy",
+      undur_diri: "exit_to_app",
+      pindah_kuliah: "transfer_within_a_station"
+    };
+    const iconEl = document.querySelector("#card-icon .material-icons-round");
+    if (iconEl && iconMap[currentJenis]) iconEl.textContent = iconMap[currentJenis];
+
     const selectWrap = document.querySelector(".select-wrapper");
 
     if (jenisWithYear.includes(currentJenis)) {

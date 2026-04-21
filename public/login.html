@@ -6,379 +6,567 @@
 <title>Login — ASMA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="img/faviconlogo.png">
+<link rel="icon" type="image/svg+xml" href="img/logo.svg">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --accent:      #2563eb;
-  --accent-2:    #0ea5e9;
-  --text-primary: #1e293b;
-  --text-muted:   #94a3b8;
+  --accent:   #2563eb;
+  --accent-2: #0ea5e9;
+  --text-p:   #1e293b;
+  --text-m:   #94a3b8;
 }
 
 html, body {
-  min-height: 100vh;
+  height: 100vh; overflow: hidden;
   font-family: 'Outfit', system-ui, sans-serif;
-  background: #f0f4ff;
-  color: var(--text-primary);
-  overflow: hidden;
+  background: #050d1a;
 }
 
-/* ===== BG ===== */
-.bg-scene {
-  position: fixed; inset: 0;
-  background: linear-gradient(145deg, #f0f4ff 0%, #e8eeff 40%, #f5f0ff 80%, #eef6ff 100%);
-  overflow: hidden;
+/* ===== 2-COLUMN LAYOUT ===== */
+.login-shell {
+  display: flex;
+  height: 100vh;
 }
 
-.blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.6;
-  animation: blobFloat 15s ease-in-out infinite;
-}
-.b1 { width:460px;height:460px;background:radial-gradient(rgba(147,197,253,0.65),transparent);top:-150px;left:-80px;animation-delay:0s; }
-.b2 { width:360px;height:360px;background:radial-gradient(rgba(196,181,253,0.55),transparent);bottom:-100px;right:-60px;animation-delay:-7s; }
-.b3 { width:240px;height:240px;background:radial-gradient(rgba(125,211,252,0.45),transparent);top:45%;left:58%;animation-delay:-12s; }
-.b4 { width:180px;height:180px;background:radial-gradient(rgba(167,243,208,0.4),transparent);top:20%;right:10%;animation-delay:-4s; }
-
-@keyframes blobFloat {
-  0%,100%{ transform:translate(0,0) scale(1); }
-  40%{ transform:translate(22px,-32px) scale(1.06); }
-  70%{ transform:translate(-14px,14px) scale(0.96); }
-}
-
-/* ===== CENTER ===== */
-.center-wrap {
-  position: relative; z-index: 1;
-  min-height: 100vh;
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px;
-}
-
-/* ===== LOGIN CARD ===== */
-.login-card {
-  width: 100%;
-  max-width: 400px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  border-radius: 28px;
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  box-shadow:
-    0 24px 60px rgba(37, 99, 235, 0.12),
-    0 8px 24px rgba(0,0,0,0.06),
-    0 1px 0 rgba(255,255,255,1) inset;
-  padding: 40px 36px;
+/* ===== LEFT — DOT CANVAS PANEL ===== */
+.left-panel {
+  flex: 1;
   position: relative;
-  animation: cardIn .6s cubic-bezier(.34,1.56,.64,1) both;
+  overflow: hidden;
+  background: #060d1c;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
 }
 
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(30px) scale(0.96); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+/* Dot canvas fills the whole left panel */
+#dot-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
 }
 
-/* Top color line */
-.login-card::before {
+/* Overlay gradient vignette */
+.left-panel::after {
   content: '';
-  position: absolute;
-  top: 0; left: 15%; right: 15%;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #2563eb, #0ea5e9, transparent);
-  border-radius: 0 0 4px 4px;
-  border-top: none;
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(6,13,28,0.5) 100%);
+  pointer-events: none; z-index: 1;
 }
 
-/* ===== LOGO AREA ===== */
-.logo-area {
-  display: flex; flex-direction: column; align-items: center;
-  margin-bottom: 28px;
-  gap: 12px;
-}
-
-.logo-circle {
-  width: 80px; height: 80px;
-  border-radius: 22px;
-  background: linear-gradient(145deg, rgba(37,99,235,0.1), rgba(14,165,233,0.07));
-  border: 1px solid rgba(37, 99, 235, 0.2);
-  display: flex; align-items: center; justify-content: center;
-  padding: 14px;
-  box-shadow: 0 8px 28px rgba(37,99,235,0.15), 0 2px 8px rgba(0,0,0,0.06);
-  animation: logoGlow 3s ease-in-out infinite;
-}
-
-@keyframes logoGlow {
-  0%,100%{ box-shadow:0 8px 24px rgba(37,99,235,0.12),0 2px 8px rgba(0,0,0,0.06); }
-  50%    { box-shadow:0 10px 32px rgba(37,99,235,0.22),0 4px 12px rgba(0,0,0,0.08); }
-}
-
-.logo-circle img {
-  width: 52px; height: 52px;
-  object-fit: contain;
-  filter: drop-shadow(0 0 8px rgba(37,99,235,0.35));
-}
-
-.logo-area h1 {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  background: linear-gradient(90deg, #1e293b 0%, #2563eb 60%, #0ea5e9 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.logo-area p {
-  font-size: 12px;
-  color: var(--text-muted);
-  letter-spacing: 0.04em;
+/* Brand text on left panel */
+.left-brand {
+  position: relative; z-index: 2;
   text-align: center;
-  line-height: 1.6;
+  pointer-events: none;
 }
-.subtitle {
+
+.left-brand-logo {
+  width: 72px; height: 72px;
+  border-radius: 20px;
+  background: rgba(37,99,235,0.15);
+  border: 1px solid rgba(37,99,235,0.35);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 22px;
+  box-shadow: 0 0 50px rgba(37,99,235,0.25), 0 0 100px rgba(37,99,235,0.08);
+  backdrop-filter: blur(10px);
+}
+.left-brand-logo img { width: 48px; height: 48px; filter: drop-shadow(0 0 12px rgba(37,99,235,0.7)); }
+
+.left-brand h2 {
+  font-size: 42px; font-weight: 800;
+  letter-spacing: 0.14em;
+  background: linear-gradient(90deg, #fff 0%, #93c5fd 50%, #818cf8 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+
+.left-brand p {
+  font-size: 14px; color: rgba(255,255,255,0.45);
+  letter-spacing: 0.06em; line-height: 1.7;
+  max-width: 280px;
+}
+
+.left-brand .tagline-accent {
+  color: rgba(147,197,253,0.8); font-weight: 500;
+}
+
+/* Decorative floating pills */
+.float-pill {
+  position: absolute; z-index: 2;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+  animation: floatPill 6s ease-in-out infinite;
+}
+.float-pill .dot-ind {
+  width: 6px; height: 6px; border-radius: 50%;
+  animation: pulseInd 2s ease-in-out infinite;
+}
+.fp1 { top: 18%; left: 8%; animation-delay: 0s; }
+.fp2 { top: 28%; right: 8%; animation-delay: -2s; animation-duration: 7s; }
+.fp3 { bottom: 22%; left: 10%; animation-delay: -4s; animation-duration: 8s; }
+.fp4 { bottom: 30%; right: 7%; animation-delay: -1s; animation-duration: 6.5s; }
+
+@keyframes floatPill {
+  0%,100%{ transform: translateY(0); }
+  50%    { transform: translateY(-8px); }
+}
+@keyframes pulseInd {
+  0%,100%{ opacity:1; } 50%{ opacity:0.4; }
+}
+
+/* ===== RIGHT — LOGIN PANEL ===== */
+.right-panel {
+  width: 420px;
+  min-width: 380px;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--text-muted);
-  letter-spacing: 0.04em;
-  text-align: left;
-  line-height: 1.6;
+  padding: 32px 36px;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow-y: auto;
 }
 
-.subtitle img {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
+/* Subtle top color line */
+.right-panel::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #2563eb, #0ea5e9, #6366f1);
 }
 
-/* ===== DIVIDER ===== */
-.divider {
-  width: 100%; height: 1px;
+.login-form-wrap {
+  width: 100%; max-width: 340px;
+  animation: slideIn .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+@keyframes slideIn {
+  from { opacity:0; transform:translateX(24px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+
+/* Form Logo */
+.form-logo {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 28px;
+}
+
+.form-logo-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  background: linear-gradient(145deg, rgba(37,99,235,0.1), rgba(14,165,233,0.07));
+  border: 1px solid rgba(37,99,235,0.2);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 20px rgba(37,99,235,0.12);
+}
+.form-logo-icon img { width: 32px; height: 32px; filter: drop-shadow(0 0 6px rgba(37,99,235,0.35)); }
+
+.form-logo-text .f-title {
+  font-size: 20px; font-weight: 700; letter-spacing: 0.08em;
+  background: linear-gradient(90deg, #1e293b, #2563eb);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.form-logo-text .f-sub {
+  font-size: 10px; color: var(--text-m); letter-spacing: 0.05em;
+}
+
+/* Welcome text */
+.welcome-block { margin-bottom: 28px; }
+.welcome-block h3 {
+  font-size: 22px; font-weight: 700; color: var(--text-p);
+  margin-bottom: 5px;
+}
+.welcome-block p {
+  font-size: 13px; color: var(--text-m); line-height: 1.5;
+}
+
+/* Divider */
+.form-divider {
+  height: 1px;
   background: linear-gradient(90deg, transparent, rgba(37,99,235,0.15), transparent);
   margin-bottom: 24px;
 }
 
-/* ===== FORM ===== */
-.form-group { margin-bottom: 16px; }
+/* Form fields */
+.form-group { margin-bottom: 18px; }
 
 label {
   display: flex; align-items: center; gap: 7px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 7px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-m); margin-bottom: 7px;
 }
 label .material-icons-round { font-size: 14px; color: var(--accent); }
 
-input {
-  width: 100%;
-  padding: 12px 16px;
-  border-radius: 14px;
-  border: 1px solid rgba(37, 99, 235, 0.16);
-  background: rgba(255, 255, 255, 0.8);
-  color: var(--text-primary);
-  font-family: 'Outfit', sans-serif;
-  font-size: 14px;
-  outline: none;
-  transition: all .25s ease;
-  box-shadow: 0 2px 6px rgba(37,99,235,0.05);
+.input-field {
+  width: 100%; padding: 12px 16px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(37,99,235,0.14);
+  background: #f8faff;
+  color: var(--text-p);
+  font-family: 'Outfit', sans-serif; font-size: 14px;
+  outline: none; transition: all .25s;
 }
-
-input::placeholder { color: #cbd5e1; }
-
-input:focus {
+.input-field::placeholder { color: #c0cce0; }
+.input-field:focus {
   border-color: rgba(37,99,235,0.45);
   background: white;
   box-shadow: 0 0 0 3px rgba(37,99,235,0.09), 0 2px 12px rgba(37,99,235,0.08);
 }
 
-/* ===== BUTTON ===== */
+/* Login button */
 .btn-login {
-  width: 100%;
-  padding: 13px;
-  border-radius: 14px;
-  border: none;
-  background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+  width: 100%; padding: 13px;
+  border-radius: 12px; border: none;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
   color: white;
   font-family: 'Outfit', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition: all .25s ease;
-  box-shadow: 0 8px 24px rgba(37,99,235,0.35), 0 1px 0 rgba(255,255,255,0.2) inset;
+  font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all .25s;
+  box-shadow: 0 8px 24px rgba(37,99,235,0.35);
   margin-top: 6px;
-  position: relative;
-  overflow: hidden;
+  position: relative; overflow: hidden;
 }
-
 .btn-login::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%;
-  width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-  transition: left .5s ease;
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+  transition:left .5s;
 }
+.btn-login:hover { transform:translateY(-2px);box-shadow:0 12px 32px rgba(37,99,235,0.45); }
+.btn-login:hover::before { left:100%; }
+.btn-login:active { transform:translateY(0); }
 
-.btn-login:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(37,99,235,0.45);
-}
-.btn-login:hover::before { left: 100%; }
-.btn-login:active { transform: translateY(0); }
-
-/* ===== FOOTER ===== */
-.login-footer {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 11px;
-  color: var(--text-muted);
+/* Footer note */
+.form-footer {
+  text-align: center; margin-top: 22px;
+  font-size: 11px; color: var(--text-m);
   display: flex; align-items: center; justify-content: center; gap: 6px;
 }
-.login-footer .material-icons-round { font-size: 13px; color: #10b981; }
+.form-footer .material-icons-round { font-size: 13px; color: #10b981; }
 
-/* ===== ERROR ===== */
+/* Error */
 @keyframes shake {
-  0%,100%{ transform:translateX(0); }
-  20%{ transform:translateX(-7px); }
-  40%{ transform:translateX(7px); }
-  60%{ transform:translateX(-4px); }
-  80%{ transform:translateX(4px); }
+  0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-7px);}
+  40%{transform:translateX(7px);}
+  60%{transform:translateX(-4px);}
+  80%{transform:translateX(4px);}
 }
 .shake { animation: shake .4s ease; }
-
 .input-error {
   border-color: rgba(239,68,68,0.45) !important;
   background: rgba(254,242,242,0.9) !important;
   box-shadow: 0 0 0 3px rgba(239,68,68,0.08) !important;
 }
-
 .error-msg {
-  font-size: 11.5px;
-  color: #dc2626;
-  margin-top: 6px;
-  display: none;
-  align-items: center;
-  gap: 4px;
+  font-size: 11.5px; color: #dc2626; margin-top: 6px;
+  display: none; align-items: center; gap: 4px;
 }
 .error-msg.show { display: flex; }
 .error-msg .material-icons-round { font-size: 13px; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .left-panel { display: none; }
+  .right-panel {
+    width: 100%; min-width: 0;
+    background: linear-gradient(145deg, #f0f4ff, #e8eeff, #f5f0ff);
+  }
+  .right-panel::before { background: linear-gradient(90deg, #2563eb, #0ea5e9, #6366f1); }
+}
 </style>
 </head>
 
 <body>
-<div class="bg-scene">
-  <div class="blob b1"></div>
-  <div class="blob b2"></div>
-  <div class="blob b3"></div>
-  <div class="blob b4"></div>
-</div>
+<div class="login-shell">
 
-<div class="center-wrap">
-  <div class="login-card">
+  <!-- LEFT: DOT ANIMATION PANEL -->
+  <div class="left-panel">
+    <canvas id="dot-canvas"></canvas>
 
-    <div class="logo-area">
-      <div class="logo-circle">
-        <img src="img/logo.svg" alt="ASMA">
-      </div>
-      <h1>ASMA</h1>
-      <div class="subtitle">
-  <img src="img/faviconlogo.png" alt="UNTAN">
-  <div>
-    Aplikasi Surat Mahasiswa<br>
-    Fakultas MIPA Untan
-  </div>
-</div>
+    <!-- Floating status pills -->
+    <div class="float-pill fp1">
+      <div class="dot-ind" style="background:#34d399;box-shadow:0 0 6px #34d399;"></div>
+      PDF Terproses
+    </div>
+    <div class="float-pill fp2">
+      <div class="dot-ind" style="background:#38bdf8;box-shadow:0 0 6px #38bdf8;"></div>
+      5 Surat Baru
+    </div>
+    <div class="float-pill fp3">
+      <div class="dot-ind" style="background:#818cf8;box-shadow:0 0 6px #818cf8;"></div>
+      Google Sheets Sync
+    </div>
+    <div class="float-pill fp4">
+      <div class="dot-ind" style="background:#fbbf24;box-shadow:0 0 6px #fbbf24;"></div>
+      Drive Terhubung
     </div>
 
-    <div class="divider"></div>
-
-    <form onsubmit="login(event)">
-      <div class="form-group">
-        <label>
-          <span class="material-icons-round">person</span>
-          Username
-        </label>
-        <input type="text" id="username" placeholder="Masukkan username" required autocomplete="username">
+    <!-- Brand -->
+    <div class="left-brand">
+      <div class="left-brand-logo">
+        <img src="img/logo.svg" alt="ASMA">
       </div>
+      <h2>ASMA</h2>
+      <p>
+        <span class="tagline-accent">Aplikasi Surat Mahasiswa</span><br>
+        Sistem pengelolaan surat akademik<br>terpadu berbasis Google Sheets
+      </p>
+    </div>
+  </div>
 
-      <div class="form-group">
-        <label>
-          <span class="material-icons-round">lock</span>
-          Password
-        </label>
-        <input type="password" id="password" placeholder="Masukkan password" required autocomplete="current-password">
-        <div class="error-msg" id="error-msg">
-          <span class="material-icons-round">error_outline</span>
-          Username atau password salah.
+  <!-- RIGHT: LOGIN FORM -->
+  <div class="right-panel">
+    <div class="login-form-wrap">
+
+      <div class="form-logo">
+        <div class="form-logo-icon">
+          <img src="img/logo.svg" alt="ASMA">
+        </div>
+        <div class="form-logo-text">
+          <div class="f-title">ASMA</div>
+          <div class="f-sub">Aplikasi Surat Mahasiswa</div>
         </div>
       </div>
 
-      <button type="submit" class="btn-login" id="btn-login">Masuk ke ASMA</button>
-    </form>
+      <div class="welcome-block">
+        <h3>Selamat Datang 👋</h3>
+        <p>Masuk ke sistem untuk mengelola surat mahasiswa.</p>
+      </div>
 
-    <div class="login-footer">
-      <span class="material-icons-round">verified_user</span>
-      Akses terbatas untuk pengelola akademik
+      <div class="form-divider"></div>
+
+      <form onsubmit="login(event)">
+        <div class="form-group">
+          <label>
+            <span class="material-icons-round">person</span>
+            Username
+          </label>
+          <input type="text" id="username" class="input-field" placeholder="Masukkan username" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="material-icons-round">lock</span>
+            Password
+          </label>
+          <input type="password" id="password" class="input-field" placeholder="Masukkan password" required autocomplete="current-password">
+          <div class="error-msg" id="error-msg">
+            <span class="material-icons-round">error_outline</span>
+            Username atau password salah.
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login" id="btn-login">Masuk ke ASMA</button>
+      </form>
+
+      <div class="form-footer">
+        <span class="material-icons-round">verified_user</span>
+        Akses terbatas untuk pengelola akademik
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+/* ==============================
+   INTERACTIVE DOT GRID CANVAS
+   (Strium-style particle network)
+   ============================== */
+(function() {
+  const canvas  = document.getElementById('dot-canvas');
+  const ctx     = canvas.getContext('2d');
+  let W, H, dots, mouse = { x: -9999, y: -9999 };
+
+  const CFG = {
+    count:        140,
+    baseRadius:   1.5,
+    maxRadius:    4,
+    speed:        0.3,
+    connectDist:  130,
+    mouseDist:    160,
+    dotColor:     [56, 189, 248],    // sky blue base
+    dotColors: [
+      [56, 189, 248],   // sky
+      [99, 102, 241],   // indigo
+      [167, 139, 250],  // violet
+      [255, 255, 255],  // white
+    ],
+    bgColor:      '#060d1c',
+  };
+
+  function resize() {
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+    if (!dots) init();
+  }
+
+  function randColor() {
+    return CFG.dotColors[Math.floor(Math.random() * CFG.dotColors.length)];
+  }
+
+  function init() {
+    dots = Array.from({ length: CFG.count }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * CFG.speed * 2,
+      vy: (Math.random() - 0.5) * CFG.speed * 2,
+      r: CFG.baseRadius + Math.random() * 1.2,
+      color: randColor(),
+      alpha: 0.3 + Math.random() * 0.5,
+    }));
+  }
+
+  function draw() {
+    ctx.fillStyle = CFG.bgColor;
+    ctx.fillRect(0, 0, W, H);
+
+    // Move dots
+    for (const d of dots) {
+      d.x += d.vx;
+      d.y += d.vy;
+      if (d.x < 0 || d.x > W) d.vx *= -1;
+      if (d.y < 0 || d.y > H) d.vy *= -1;
+    }
+
+    // Draw connections
+    for (let i = 0; i < dots.length; i++) {
+      for (let j = i + 1; j < dots.length; j++) {
+        const a = dots[i], b = dots[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < CFG.connectDist) {
+          const op = (1 - dist / CFG.connectDist) * 0.18;
+          const [r, g, bl] = a.color;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(${r},${g},${bl},${op})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Mouse-repel + draw dots
+    for (const d of dots) {
+      const dx = d.x - mouse.x, dy = d.y - mouse.y;
+      const md = Math.sqrt(dx*dx + dy*dy);
+      let r = d.r;
+      let alpha = d.alpha;
+
+      if (md < CFG.mouseDist) {
+        const pull = 1 - md / CFG.mouseDist;
+        // push gently
+        d.vx += (dx / md) * pull * 0.6;
+        d.vy += (dy / md) * pull * 0.6;
+        // clamp velocity
+        const spd = Math.sqrt(d.vx*d.vx + d.vy*d.vy);
+        if (spd > 2.5) { d.vx /= spd/2.5; d.vy /= spd/2.5; }
+        r = d.r + pull * (CFG.maxRadius - d.r);
+        alpha = Math.min(1, d.alpha + pull * 0.5);
+      } else {
+        // drift back
+        d.vx *= 0.98;
+        d.vy *= 0.98;
+      }
+
+      const [cr, cg, cb] = d.color;
+      // Glow
+      if (md < CFG.mouseDist * 0.8) {
+        const grd = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, r * 3.5);
+        grd.addColorStop(0, `rgba(${cr},${cg},${cb},${alpha * 0.25})`);
+        grd.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, r * 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = grd;
+        ctx.fill();
+      }
+
+      // Dot
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${cr},${cg},${cb},${alpha})`;
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  // Mouse tracking on left panel
+  document.querySelector('.left-panel').addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+  });
+  document.querySelector('.left-panel').addEventListener('mouseleave', () => {
+    mouse.x = -9999; mouse.y = -9999;
+  });
+
+  window.addEventListener('resize', resize);
+  resize();
+  draw();
+})();
+
+/* ====== LOGIN LOGIC ====== */
 async function login(e) {
   e.preventDefault();
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
-  const btn      = document.getElementById("btn-login");
-  const errMsg   = document.getElementById("error-msg");
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const btn      = document.getElementById('btn-login');
+  const errMsg   = document.getElementById('error-msg');
 
   btn.disabled = true;
-  btn.textContent = "Memverifikasi...";
-  errMsg.classList.remove("show");
+  btn.textContent = 'Memverifikasi...';
+  errMsg.classList.remove('show');
 
   try {
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res  = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
     });
     const data = await res.json();
 
     if (data.success) {
-      btn.textContent = "✓ Berhasil!";
-      btn.style.background = "linear-gradient(135deg, #059669, #34d399)";
-      localStorage.setItem("asmaLogin", "true");
-      setTimeout(() => { window.location.href = "/"; }, 600);
+      btn.textContent = '✓ Berhasil!';
+      btn.style.background = 'linear-gradient(135deg, #059669, #34d399)';
+      localStorage.setItem('asmaLogin', 'true');
+      setTimeout(() => { window.location.href = '/'; }, 600);
     } else {
-      const card = document.querySelector(".login-card");
-      card.classList.remove("shake");
-      void card.offsetWidth;
-      card.classList.add("shake");
-      document.getElementById("username").classList.add("input-error");
-      document.getElementById("password").classList.add("input-error");
-      errMsg.classList.add("show");
+      const wrap = document.querySelector('.login-form-wrap');
+      wrap.classList.remove('shake');
+      void wrap.offsetWidth;
+      wrap.classList.add('shake');
+      ['username','password'].forEach(id => document.getElementById(id).classList.add('input-error'));
+      errMsg.classList.add('show');
       btn.disabled = false;
-      btn.textContent = "Masuk ke ASMA";
+      btn.textContent = 'Masuk ke ASMA';
     }
   } catch(err) {
     btn.disabled = false;
-    btn.textContent = "Masuk ke ASMA";
+    btn.textContent = 'Masuk ke ASMA';
   }
 
-  ["username","password"].forEach(id => {
-    document.getElementById(id).addEventListener("input", () => {
-      document.getElementById(id).classList.remove("input-error");
-      errMsg.classList.remove("show");
+  ['username','password'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      document.getElementById(id).classList.remove('input-error');
+      errMsg.classList.remove('show');
     }, { once: true });
   });
 }

@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/nav.css" />
   <link rel="icon" type="image/svg+xml" href="img/logo.svg">
 </head>
 <body>
@@ -20,52 +19,106 @@
     <div class="blob blob-2"></div>
     <div class="blob blob-3"></div>
     <div class="blob blob-4"></div>
-    <div class="noise-overlay"></div>
   </div>
 
   <div class="app-shell">
 
-    <!-- HEADER -->
-    <header class="app-header">
-      <div class="header-left">
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass-sidebar">
+
+      <!-- Logo -->
+      <div class="sidebar-logo">
         <div class="logo-wrap">
-          <img src="img/logo.svg" class="app-logo" alt="ASMA Logo">
+          <img src="img/logo.svg" class="app-logo" alt="ASMA">
         </div>
-        <div class="header-text">
-          <div class="app-title">ASMA</div>
-          <div class="app-subtitle">Aplikasi Surat Mahasiswa <span class="version-tag">v1.0</span></div>
+        <div class="sidebar-brand">
+          <div class="brand-title">ASMA</div>
+          <div class="brand-sub">Surat Mahasiswa</div>
         </div>
       </div>
-      <div class="header-right">
-        <div class="datetime-wrap">
+
+      <!-- Nav Label -->
+      <div class="nav-section-label">MENU</div>
+
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-jenis="aktif_kuliah" data-label="Surat Aktif Kuliah">
+          <div class="nav-icon-wrap">
+            <span class="material-icons-round">home_work</span>
+          </div>
+          <span class="nav-text">Aktif Kuliah</span>
+        </div>
+
+        <div class="nav-item" data-jenis="ket_lulus" data-label="Surat Keterangan Lulus">
+          <div class="nav-icon-wrap">
+            <span class="material-icons-round">workspace_premium</span>
+          </div>
+          <span class="nav-text">Ket. Lulus</span>
+        </div>
+
+        <div class="nav-item" data-jenis="cuti_kuliah" data-label="Surat Cuti Kuliah">
+          <div class="nav-icon-wrap">
+            <span class="material-icons-round">event_busy</span>
+          </div>
+          <span class="nav-text">Cuti Kuliah</span>
+        </div>
+
+        <div class="nav-item" data-jenis="undur_diri" data-label="Surat Pengunduran Diri">
+          <div class="nav-icon-wrap">
+            <span class="material-icons-round">exit_to_app</span>
+          </div>
+          <span class="nav-text">Undur Diri</span>
+        </div>
+
+        <div class="nav-item" data-jenis="pindah_kuliah" data-label="Surat Pindah Kuliah">
+          <div class="nav-icon-wrap">
+            <span class="material-icons-round">transfer_within_a_station</span>
+          </div>
+          <span class="nav-text">Pindah Kuliah</span>
+        </div>
+      </nav>
+
+      <!-- Spacer -->
+      <div class="sidebar-spacer"></div>
+
+      <!-- Bottom: logout & datetime -->
+      <div class="sidebar-footer">
+        <div class="datetime-block">
           <span class="material-icons-round dt-icon">schedule</span>
           <div class="datetime" id="datetime"></div>
         </div>
-        <button class="btn-logout" onclick="logout()">
+        <button class="btn-logout" onclick="logout()" title="Logout">
           <span class="material-icons-round">logout</span>
         </button>
       </div>
-    </header>
 
-    <!-- MAIN CARD -->
-    <main class="app-main">
-      <section class="card">
+    </aside>
 
-        <!-- CARD HEADER -->
-        <div class="card-header">
-          <div class="card-title-group">
-            <div class="card-icon-wrap" id="card-icon">
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- TOP BAR -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="page-title-group">
+            <div class="page-icon" id="card-icon">
               <span class="material-icons-round">home_work</span>
             </div>
             <div>
-              <h2 id="card-title">Surat Aktif Kuliah</h2>
+              <h1 id="card-title">Surat Aktif Kuliah</h1>
               <p id="card-subtitle">Sheet: <span id="sheet-label" class="sheet-chip">aktif_kuliah</span></p>
             </div>
           </div>
+        </div>
+        <div class="topbar-right">
           <div class="status-pill" id="status-pill">
             <span class="status-dot"></span>Siap
           </div>
         </div>
+      </div>
+
+      <!-- CONTENT CARD -->
+      <div class="content-card glass-card">
 
         <!-- SEARCH -->
         <div class="search-wrapper">
@@ -81,7 +134,7 @@
             </thead>
             <tbody id="table-body">
               <tr><td colspan="4" class="empty-row">
-                <span class="material-icons-round" style="font-size:32px;opacity:0.25;display:block;margin-bottom:8px;">hourglass_top</span>
+                <span class="material-icons-round" style="font-size:32px;opacity:0.22;display:block;margin-bottom:8px;">hourglass_top</span>
                 Memuat data...
               </td></tr>
             </tbody>
@@ -104,16 +157,14 @@
           <input type="file" id="file-input" multiple accept="application/pdf" hidden />
 
           <button class="btn btn-ghost" id="btn-choose" type="button">
-            <span class="material-icons-round btn-icon">folder_open</span>
-            Pilih File
+            <span class="material-icons-round btn-icon">folder_open</span>Pilih File
           </button>
           <button class="btn btn-accent" id="btn-upload" type="button" disabled>
-            <span class="material-icons-round btn-icon">cloud_upload</span>
-            Upload
+            <span class="material-icons-round btn-icon">cloud_upload</span>Upload
           </button>
 
           <div class="file-info" id="file-info">
-            <span class="material-icons-round" style="font-size:14px;vertical-align:middle">attach_file</span>
+            <span class="material-icons-round" style="font-size:14px">attach_file</span>
             Belum ada file dipilih.
           </div>
         </div>
@@ -123,45 +174,21 @@
 
         <!-- STATUS BAR -->
         <div class="status-bar" id="status-bar">
-          <span class="material-icons-round" style="font-size:13px;vertical-align:middle">info</span>
+          <span class="material-icons-round" style="font-size:13px">info</span>
           Status: siap.
         </div>
 
-      </section>
+      </div>
     </main>
-
-    <!-- BOTTOM NAV -->
-    <nav class="bottom-nav">
-      <div class="nav-item active" data-jenis="aktif_kuliah" data-label="Surat Aktif Kuliah">
-        <span class="material-icons-round">home_work</span>
-        <span class="nav-label">Aktif</span>
-      </div>
-      <div class="nav-item" data-jenis="ket_lulus" data-label="Surat Keterangan Lulus">
-        <span class="material-icons-round">workspace_premium</span>
-        <span class="nav-label">Lulus</span>
-      </div>
-      <div class="nav-item" data-jenis="cuti_kuliah" data-label="Surat Cuti">
-        <span class="material-icons-round">event_busy</span>
-        <span class="nav-label">Cuti</span>
-      </div>
-      <div class="nav-item" data-jenis="undur_diri" data-label="Surat Pengunduran Diri">
-        <span class="material-icons-round">exit_to_app</span>
-        <span class="nav-label">Undur</span>
-      </div>
-      <div class="nav-item" data-jenis="pindah_kuliah" data-label="Surat Pindah">
-        <span class="material-icons-round">transfer_within_a_station</span>
-        <span class="nav-label">Pindah</span>
-      </div>
-    </nav>
   </div>
 
   <!-- LOADING OVERLAY -->
   <div id="loading-overlay">
-    <div class="loader-wrap">
+    <div class="loader-wrap glass-card">
       <div class="lung-loader">
-        <svg viewBox="0 0 60 50" fill="none" xmlns="http://www.w3.org/2000/svg" class="lung-svg">
-          <path d="M30 5 C30 5 18 9 14 20 C10 31 12 42 18 44 C24 46 28 41 29 36 C30 31 30 18 30 5Z" fill="url(#ll)" opacity="0.9"/>
-          <path d="M30 5 C30 5 42 9 46 20 C50 31 48 42 42 44 C36 46 32 41 31 36 C30 31 30 18 30 5Z" fill="url(#lr)" opacity="0.9"/>
+        <svg viewBox="0 0 60 50" fill="none" class="lung-svg">
+          <path d="M30 5C30 5 18 9 14 20C10 31 12 42 18 44C24 46 28 41 29 36C30 31 30 18 30 5Z" fill="url(#ll)" opacity="0.9"/>
+          <path d="M30 5C30 5 42 9 46 20C50 31 48 42 42 44C36 46 32 41 31 36C30 31 30 18 30 5Z" fill="url(#lr)" opacity="0.9"/>
           <rect x="27.5" y="1" width="5" height="7" rx="2.5" fill="#60a5fa"/>
           <defs>
             <linearGradient id="ll" x1="0" y1="0" x2="1" y2="1">
