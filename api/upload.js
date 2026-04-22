@@ -42,22 +42,37 @@ function getDriveFolder(jenis) {
 }
 
 // ===============================
-// 🔍 PARSER NAMA & NIM (CERDAS)
+// 🔤 FORMAT NAMA
 // ===============================
-//tambahan ni gess  dari chatgpt katanya taruh di atas function extranamadannim wkowkowk
 function toProperCase(str) {
   return str
     .toLowerCase()
     .replace(/\b\w/g, c => c.toUpperCase());
 }
 
+// 🔥 FIX TAMBAHAN (BIAR NAMA GAK NEMPEL)
+function fixNamaSpacing(nama) {
+  // kasih spasi antar huruf kecil ke kapital (contoh: muhammadRizki)
+  nama = nama.replace(/([a-z])([A-Z])/g, "$1 $2");
+
+  // kalau full nempel tanpa spasi → paksa pecah dikit
+  if (!nama.includes(" ")) {
+    nama = nama.replace(/([a-z]{4,})(?=[a-z]{4,})/gi, "$1 ");
+  }
+
+  return nama;
+}
+
+// ===============================
+// 🔍 PARSER NAMA & NIM
+// ===============================
 function extractNamaNim(text, jenis) {
   let nama = "";
   let nim = "";
 
   const clean = text
     .replace(/\r/g, "")
-    .replace(/\n+/g, " ")
+    .replace(/\n/g, " ") // 🔥 FIX (jangan \n+)
     .replace(/\s+/g, " ");
 
   if (jenis === "aktif_kuliah") {
@@ -65,8 +80,8 @@ function extractNamaNim(text, jenis) {
 
     const namaMatch = after.match(
       /nama\s*[:\-]?\s*([a-zA-Z.'\s]+?)(?=\s+(nim|nomor|tempat|jurusan|alamat|$))/i
-
     );
+
     const nimMatch = after.match(
       /(nomor induk mahasiswa|nim)\s*[:\-]?\s*(h\d{8,12})/i
     );
@@ -78,6 +93,7 @@ function extractNamaNim(text, jenis) {
     const namaMatch = clean.match(
       /nama\s*[:\-]?\s*([a-zA-Z.'\s]+?)(?=\s+(nim|nomor|tempat|jurusan|alamat|$))/i
     );
+
     const nimMatch = clean.match(
       /(nim|nomor induk mahasiswa)\s*[:\-]?\s*(h\d{8,12})/i
     );
@@ -87,9 +103,9 @@ function extractNamaNim(text, jenis) {
   }
 
   return {
-  nama: toProperCase(nama.trim()),
-  nim: nim.trim().toUpperCase()
-};
+    nama: toProperCase(fixNamaSpacing(nama.trim())), // 🔥 FIX DIPAKAI DI SINI
+    nim: nim.trim().toUpperCase()
+  };
 }
 
 // ===============================
@@ -103,8 +119,8 @@ export default async function handler(req, res) {
 
     const jenis = req.query?.jenis || "aktif_kuliah";
     const tahun = JENIS_WITH_YEAR.includes(jenis)
-  ? req.query?.tahun
-  : "";
+      ? req.query?.tahun
+      : "";
 
     const buffer = await bufferFromReq(req);
 
@@ -169,22 +185,22 @@ export default async function handler(req, res) {
     });
 
     const link = `https://drive.google.com/file/d/${up.data.id}/view`;
-    
-// ===============================
-// APPEND SHEET (FINAL & BENAR)
-// ===============================
-const row = JENIS_WITH_YEAR.includes(jenis)
-  ? [nama, nim, link, tahun]
-  : [nama, nim, link];
 
-await sheets.spreadsheets.values.append({
-  spreadsheetId: process.env.GOOGLE_SHEET_ID,
-  range: `${jenis}!A:D`,
-  valueInputOption: "USER_ENTERED",
-  requestBody: {
-    values: [row]
-  }
-});
+    // ===============================
+    // APPEND SHEET
+    // ===============================
+    const row = JENIS_WITH_YEAR.includes(jenis)
+      ? [nama, nim, link, tahun]
+      : [nama, nim, link];
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range: `${jenis}!A:D`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [row]
+      }
+    });
 
     return res.json({
       success: true,
