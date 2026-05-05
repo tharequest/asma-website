@@ -42,12 +42,10 @@ function getDriveFolder(jenis) {
 }
 
 // ===============================
-// 🔤 FORMAT NAMA
+// FORMAT NAMA
 // ===============================
 function toProperCase(str) {
-  return str
-    .toLowerCase()
-    .replace(/\b\w/g, c => c.toUpperCase());
+  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function fixNamaSpacing(nama) {
@@ -61,7 +59,7 @@ function fixNamaSpacing(nama) {
 }
 
 // ===============================
-// 🔍 PARSER NAMA & NIM (FINAL FIX)
+// PARSER NAMA & NIM (FINAL STABLE)
 // ===============================
 function extractNamaNim(text, jenis) {
   let nama = "";
@@ -74,52 +72,54 @@ function extractNamaNim(text, jenis) {
     .replace(/Dokumen ini telah.*?BSrE\./i, "")
     .trim();
 
-  if (jenis === "aktif_kuliah") {
-    const after = clean.split(/menerangkan bahwa/i)[1] || "";
+  // =======================
+  // AMBIL NAMA
+  // =======================
+  const namaMatch = clean.match(
+    /nama\s*[:\-]?\s*([a-zA-Z.'\s]+?)(?=\s+(nomor|nim|tempat|jurusan|alamat|$))/i
+  );
 
-    const namaMatch = after.match(
-      /nama\s*[:\-]?\s*([a-zA-Z.'\s]+?)(?=\s+(nim|nomor|tempat|jurusan|alamat|$))/i
-    );
+  if (namaMatch) {
+    nama = namaMatch[1];
+  }
 
-    const nimMatch = after.match(
-      /(nim|nomor induk mahasiswa)\s*[:\-]?\s*([A-Z]?\s*\d[\d\s]{7,15})/i
-    );
+  // =======================
+  // AMBIL NIM (PRIMARY)
+  // =======================
+  const nimMatch = clean.match(
+    /(nim|nomor induk mahasiswa)\s*[:\-]?\s*([A-Z]?\s*\d[\d\s]{8,20})/i
+  );
 
-    if (namaMatch) nama = namaMatch[1];
+  if (nimMatch) {
+    let raw = nimMatch[2];
 
-    if (nimMatch) {
-      nim = nimMatch[2].replace(/\s+/g, "").toUpperCase();
-    }
+    // bersihin semua selain huruf & angka
+    raw = raw.replace(/[^A-Z0-9]/gi, "");
 
-  } else {
-    const namaMatch = clean.match(
-      /nama\s*[:\-]?\s*([a-zA-Z.'\s]+?)(?=\s+(nomor|nim|tempat|jurusan|alamat|$))/i
-    );
+    // ambil pola NIM valid
+    const fix = raw.match(/H\d{9,12}|\d{10,12}/i);
 
-    const nimMatch = clean.match(
-      /(nim|nomor induk mahasiswa)\s*[:\-]?\s*([A-Z]?\s*\d[\d\s]{7,15})/i
-    );
-
-    if (namaMatch) nama = namaMatch[1];
-
-    if (nimMatch) {
-      nim = nimMatch[2].replace(/\s+/g, "").toUpperCase();
-    }
-
-    // fallback kalau PDF kacau
-    if (!nama || !nim) {
-      const fallback = clean.match(
-        /nama\s*:\s*(.+?)\s+nomor.*?mahasiswa\s*:\s*([A-Z0-9\s]+)/i
-      );
-
-      if (fallback) {
-        if (!nama) nama = fallback[1];
-        if (!nim) nim = fallback[2].replace(/\s+/g, "").toUpperCase();
-      }
+    if (fix) {
+      nim = fix[0].toUpperCase();
     }
   }
 
-  // 🔥 FIX ANGKA NYANGKUT DI NAMA
+  // =======================
+  // FALLBACK NIM (ANTI GAGAL TOTAL)
+  // =======================
+  if (!nim) {
+    const all = clean.replace(/[^A-Z0-9]/gi, " ");
+
+    const candidates = all.match(/[A-Z]?\d{10,12}/g);
+
+    if (candidates && candidates.length > 0) {
+      nim = candidates[candidates.length - 1].toUpperCase();
+    }
+  }
+
+  // =======================
+  // FIX NAMA (BUANG ANGKA NYANGKUT)
+  // =======================
   nama = nama.replace(/\s+\d+$/, "");
 
   return {
@@ -157,7 +157,7 @@ export default async function handler(req, res) {
     }
 
     // ===============================
-    // SHEETS (CEK DUPLIKAT)
+    // CEK DUPLIKAT
     // ===============================
     const sheets = google.sheets({
       version: "v4",
@@ -181,7 +181,7 @@ export default async function handler(req, res) {
     }
 
     // ===============================
-    // DRIVE UPLOAD
+    // UPLOAD DRIVE
     // ===============================
     const drive = google.drive({
       version: "v3",
@@ -207,7 +207,7 @@ export default async function handler(req, res) {
     const link = `https://drive.google.com/file/d/${up.data.id}/view`;
 
     // ===============================
-    // APPEND SHEET
+    // SIMPAN KE SHEET
     // ===============================
     const row = JENIS_WITH_YEAR.includes(jenis)
       ? [nama, nim, link, tahun]
