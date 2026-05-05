@@ -108,13 +108,16 @@ function extractNamaNim(text, jenis) {
   // FALLBACK NIM (ANTI GAGAL TOTAL)
   // =======================
   if (!nim) {
-    const all = clean.replace(/[^A-Z0-9]/gi, " ");
+    // =======================
+// AMBIL NIM (SUPER STABIL)
+// =======================
+const all = clean.replace(/[^A-Z0-9]/gi, " ");
 
-    const candidates = all.match(/[A-Z]?\d{10,12}/g);
+const candidates = all.match(/[A-Z]?\d{10,12}/g);
 
-    if (candidates && candidates.length > 0) {
-      nim = candidates[candidates.length - 1].toUpperCase();
-    }
+if (candidates && candidates.length > 0) {
+  nim = candidates[candidates.length - 1].toUpperCase();
+}
   }
 
   // =======================
