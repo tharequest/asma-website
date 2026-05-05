@@ -100,6 +100,31 @@ function extractNamaNim(text, jenis) {
 
     if (namaMatch) nama = namaMatch[1];
     if (nimMatch) nim = nimMatch[2];
+
+    // ===============================
+    // FALLBACK: Layout 2-kolom
+    // Beberapa PDF diekstrak pdf-parse sebagai
+    // "nama nomor induk mahasiswa ... alamat : NILAI1 : NILAI2 ..."
+    // karena tabel 2-kolom dibaca kiri dulu, kanan kemudian.
+    // NIM juga bisa ada spasi sisipan (mis. H103125106 4) -> dihapus.
+    // ===============================
+    if (!nama || !nim) {
+      const colMatch = clean.match(
+        /nama\s+nomor\s+induk\s+mahasiswa[\s\w\/]+alamat\s*:(.+?)(?=dokumen|kementerian|$)/i
+      );
+      if (colMatch) {
+        const parts = colMatch[1].trim().split(/\s*:\s*/);
+        const values = parts.map(p => p.trim()).filter(p => p.length > 0);
+        if (values.length >= 2) {
+          if (!nama) nama = values[0];
+          if (!nim) {
+            const nimRaw = values[1].replace(/\s+/g, "");
+            const nimFix = nimRaw.match(/h\d{8,12}/i);
+            if (nimFix) nim = nimFix[0];
+          }
+        }
+      }
+    }
   }
 
   return {
