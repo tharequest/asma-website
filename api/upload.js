@@ -50,12 +50,9 @@ function toProperCase(str) {
     .replace(/\b\w/g, c => c.toUpperCase());
 }
 
-// 🔥 FIX TAMBAHAN (BIAR NAMA GAK NEMPEL)
 function fixNamaSpacing(nama) {
-  // kasih spasi antar huruf kecil ke kapital (contoh: muhammadRizki)
   nama = nama.replace(/([a-z])([A-Z])/g, "$1 $2");
 
-  // kalau full nempel tanpa spasi → paksa pecah dikit
   if (!nama.includes(" ")) {
     nama = nama.replace(/([a-z]{4,})(?=[a-z]{4,})/gi, "$1 ");
   }
@@ -64,7 +61,7 @@ function fixNamaSpacing(nama) {
 }
 
 // ===============================
-// 🔍 PARSER NAMA & NIM
+// 🔍 PARSER NAMA & NIM (FINAL FIX)
 // ===============================
 function extractNamaNim(text, jenis) {
   let nama = "";
@@ -74,7 +71,7 @@ function extractNamaNim(text, jenis) {
     .replace(/\r/g, "")
     .replace(/\n/g, " ")
     .replace(/\s+/g, " ")
-    .replace(/Dokumen ini telah.*?BSrE\./i, "") // 🔥 buang e-sign
+    .replace(/Dokumen ini telah.*?BSrE\./i, "")
     .trim();
 
   if (jenis === "aktif_kuliah") {
@@ -85,7 +82,7 @@ function extractNamaNim(text, jenis) {
     );
 
     const nimMatch = after.match(
-      /(nim|nomor induk mahasiswa)\s*[:\-]?\s*([hH]\s*\d[\d\s]{7,15})/i
+      /(nim|nomor induk mahasiswa)\s*[:\-]?\s*([A-Z]?\s*\d[\d\s]{7,15})/i
     );
 
     if (namaMatch) nama = namaMatch[1];
@@ -100,7 +97,7 @@ function extractNamaNim(text, jenis) {
     );
 
     const nimMatch = clean.match(
-      /(nim|nomor induk mahasiswa)\s*[:\-]?\s*([hH]\s*\d[\d\s]{7,15})/i
+      /(nim|nomor induk mahasiswa)\s*[:\-]?\s*([A-Z]?\s*\d[\d\s]{7,15})/i
     );
 
     if (namaMatch) nama = namaMatch[1];
@@ -109,10 +106,10 @@ function extractNamaNim(text, jenis) {
       nim = nimMatch[2].replace(/\s+/g, "").toUpperCase();
     }
 
-    // fallback kalau format kacau
+    // fallback kalau PDF kacau
     if (!nama || !nim) {
       const fallback = clean.match(
-        /nama\s*:\s*(.+?)\s+nomor.*?mahasiswa\s*:\s*([hH\d\s]+)/i
+        /nama\s*:\s*(.+?)\s+nomor.*?mahasiswa\s*:\s*([A-Z0-9\s]+)/i
       );
 
       if (fallback) {
@@ -121,6 +118,9 @@ function extractNamaNim(text, jenis) {
       }
     }
   }
+
+  // 🔥 FIX ANGKA NYANGKUT DI NAMA
+  nama = nama.replace(/\s+\d+$/, "");
 
   return {
     nama: toProperCase(fixNamaSpacing(nama.trim())),
