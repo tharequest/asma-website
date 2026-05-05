@@ -76,12 +76,12 @@ function extractNamaNim(text, jenis) {
   // AMBIL NAMA
   // =======================
   const namaMatch = clean.match(
-    /nama\s*[:\-]?\s*([a-zA-Z.'\s]+?)(?=\s+(nomor|nim|tempat|jurusan|alamat|$))/i
-  );
+  /nama\s*[:\-]?\s*(.+?)\s*(nomor|nim)/i
+);
 
-  if (namaMatch) {
-    nama = namaMatch[1];
-  }
+ if (namaMatch) {
+  nama = namaMatch[1].replace(/\d+/g, "").trim();
+}
 
   // =======================
   // AMBIL NIM (PRIMARY)
