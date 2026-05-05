@@ -72,8 +72,10 @@ function extractNamaNim(text, jenis) {
 
   const clean = text
     .replace(/\r/g, "")
-    .replace(/\n/g, " ") // 🔥 FIX (jangan \n+)
-    .replace(/\s+/g, " ");
+    .replace(/\n/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/Dokumen ini telah.*?BSrE\./i, "") // 🔥 buang e-sign
+    .trim();
 
   if (jenis === "aktif_kuliah") {
     const after = clean.split(/menerangkan bahwa/i)[1] || "";
@@ -83,45 +85,45 @@ function extractNamaNim(text, jenis) {
     );
 
     const nimMatch = after.match(
-      /(nomor induk mahasiswa|nim)\s*[:\-]?\s*(h\d{8,12})/i
+      /(nim|nomor induk mahasiswa)\s*[:\-]?\s*([hH]\s*\d[\d\s]{7,15})/i
     );
 
     if (namaMatch) nama = namaMatch[1];
-    if (nimMatch) nim = nimMatch[2];
+
+    if (nimMatch) {
+      nim = nimMatch[2].replace(/\s+/g, "").toUpperCase();
+    }
 
   } else {
     const namaMatch = clean.match(
-      /nama\s*[:\-]?\s*([a-zA-Z.'\s]+?)(?=\s+(nim|nomor|tempat|jurusan|alamat|$))/i
+      /nama\s*[:\-]?\s*([a-zA-Z.'\s]+?)(?=\s+(nomor|nim|tempat|jurusan|alamat|$))/i
     );
 
     const nimMatch = clean.match(
-      /(nim|nomor induk mahasiswa)\s*[:\-]?\s*(h\d{8,12})/i
+      /(nim|nomor induk mahasiswa)\s*[:\-]?\s*([hH]\s*\d[\d\s]{7,15})/i
     );
 
     if (namaMatch) nama = namaMatch[1];
-    if (nimMatch) nim = nimMatch[2];
 
-  if (!nama || !nim) {
-      const colMatch = clean.match(
-        /nama\s+nomor\s+induk\s+mahasiswa[\s\w\/]+alamat\s*:(.+?)(?=dokumen|kementerian|$)/i
+    if (nimMatch) {
+      nim = nimMatch[2].replace(/\s+/g, "").toUpperCase();
+    }
+
+    // fallback kalau format kacau
+    if (!nama || !nim) {
+      const fallback = clean.match(
+        /nama\s*:\s*(.+?)\s+nomor.*?mahasiswa\s*:\s*([hH\d\s]+)/i
       );
-      if (colMatch) {
-        const parts = colMatch[1].trim().split(/\s*:\s*/);
-        const values = parts.map(p => p.trim()).filter(p => p.length > 0);
-        if (values.length >= 2) {
-          if (!nama) nama = values[0];
-          if (!nim) {
-            const nimRaw = values[1].replace(/\s+/g, "");
-            const nimFix = nimRaw.match(/h\d{8,12}/i);
-            if (nimFix) nim = nimFix[0];
-          }
-        }
+
+      if (fallback) {
+        if (!nama) nama = fallback[1];
+        if (!nim) nim = fallback[2].replace(/\s+/g, "").toUpperCase();
       }
     }
   }
 
   return {
-    nama: toProperCase(fixNamaSpacing(nama.trim())), // 🔥 FIX DIPAKAI DI SINI
+    nama: toProperCase(fixNamaSpacing(nama.trim())),
     nim: nim.trim().toUpperCase()
   };
 }
