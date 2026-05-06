@@ -98,7 +98,7 @@ function extractNamaNim(text, jenis) {
     raw = raw.replace(/[^A-Z0-9]/gi, "");
 
     // ambil pola NIM valid — minimal 10 digit setelah H (standar NIM Untan)
-    const fix = raw.match(/H\d{10,12}|\d{10,12}/i);
+    const fix = raw.match(/H\d{9,10}|\d{10}/i);
 
     if (fix) {
       nim = fix[0].toUpperCase();
@@ -131,7 +131,7 @@ function extractNamaNim(text, jenis) {
 
     if (candidates && candidates.length > 0) {
       // Prioritaskan NIM yang diawali H (format NIM Untan), baru fallback ke kandidat terakhir
-      const preferred = candidates.find(c => /^H\d{10,12}$/i.test(c));
+      const preferred = candidates.find(c => /^H\d{9,10}$/i.test(c));
       nim = (preferred || candidates[candidates.length - 1]).toUpperCase();
     }
   }
