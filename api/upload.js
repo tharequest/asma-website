@@ -96,8 +96,8 @@ function extractNamaNim(text, jenis) {
     // bersihin semua selain huruf & angka
     raw = raw.replace(/[^A-Z0-9]/gi, "");
 
-    // ambil pola NIM valid
-    const fix = raw.match(/H\d{9,12}|\d{10,12}/i);
+    // ambil pola NIM valid — minimal 10 digit setelah H (standar NIM Untan)
+    const fix = raw.match(/H\d{10,12}|\d{10,12}/i);
 
     if (fix) {
       nim = fix[0].toUpperCase();
@@ -109,15 +109,28 @@ function extractNamaNim(text, jenis) {
   // =======================
   if (!nim) {
     // =======================
-// AMBIL NIM (SUPER STABIL)
-// =======================
-const all = clean.replace(/[^A-Z0-9]/gi, " ");
+    // AMBIL NIM (SUPER STABIL + REKONSTRUKSI NIM TERBELAH)
+    // =======================
+    const all = clean.replace(/[^A-Z0-9]/gi, " ");
 
-const candidates = all.match(/[A-Z]?\d{10,12}/g);
+    // Coba temukan NIM lengkap dulu
+    let candidates = all.match(/[A-Z]?\d{10,12}/g);
 
-if (candidates && candidates.length > 0) {
-  nim = candidates[candidates.length - 1].toUpperCase();
-}
+    // Jika tidak ditemukan, coba rekonstruksi NIM yang terbelah lintas baris
+    // Contoh: "H103125106 4" → "H1031251064"
+    if (!candidates) {
+      const splitMatch = all.match(/\b(H\d{9})\s+(\d{1,3})\b/i);
+      if (splitMatch) {
+        const combined = splitMatch[1] + splitMatch[2];
+        if (/H\d{10,12}/i.test(combined)) {
+          candidates = [combined];
+        }
+      }
+    }
+
+    if (candidates && candidates.length > 0) {
+      nim = candidates[candidates.length - 1].toUpperCase();
+    }
   }
 
   // =======================
