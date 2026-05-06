@@ -70,6 +70,7 @@ function extractNamaNim(text, jenis) {
     .replace(/\n/g, " ")
     .replace(/\s+/g, " ")
     .replace(/Dokumen ini telah.*?BSrE\./i, "")
+    .replace(/NIP\s*\d[\d\s]*/gi, "")   // Hapus pola NIP agar tidak tertukar dengan NIM
     .trim();
 
   // =======================
@@ -129,7 +130,9 @@ function extractNamaNim(text, jenis) {
     }
 
     if (candidates && candidates.length > 0) {
-      nim = candidates[candidates.length - 1].toUpperCase();
+      // Prioritaskan NIM yang diawali H (format NIM Untan), baru fallback ke kandidat terakhir
+      const preferred = candidates.find(c => /^H\d{10,12}$/i.test(c));
+      nim = (preferred || candidates[candidates.length - 1]).toUpperCase();
     }
   }
 
