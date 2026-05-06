@@ -67,83 +67,38 @@ function extractNamaNim(text, jenis) {
 
   const clean = text
     .replace(/\r/g, "")
-    .replace(/\n/g, " ")
-    .replace(/\s+/g, " ")
-    .replace(/Dokumen ini telah.*?BSrE\./i, "")
-    .replace(/NIP\s*\d[\d\s]*/gi, "")   // Hapus pola NIP agar tidak tertukar dengan NIM
+    .replace(/\n/g, "\n")
+    .replace(/Dokumen ini telah.*?BSrE\./is, "")
     .trim();
 
   // =======================
   // AMBIL NAMA
   // =======================
   const namaMatch = clean.match(
-  /nama\s*[:\-]?\s*(.+?)\s*(nomor|nim)/i
-);
+    /nama\s*:\s*(.+)/i
+  );
 
- if (namaMatch) {
-  nama = namaMatch[1].replace(/\d+/g, "").trim();
-}
+  if (namaMatch) {
+    nama = namaMatch[1]
+      .split("\n")[0]
+      .replace(/\d+/g, "")
+      .trim();
+  }
 
   // =======================
-  // AMBIL NIM (PRIMARY)
+  // AMBIL NIM
   // =======================
   const nimMatch = clean.match(
-    /(nim|nomor induk mahasiswa)\s*[:\-]?\s*([A-Z]?\s*\d[\d\s]{8,20})/i
+    /nomor induk mahasiswa\s*:\s*([A-Z0-9]+)/i
   );
 
   if (nimMatch) {
-    let raw = nimMatch[2];
-
-    // bersihin semua selain huruf & angka
-    raw = raw.replace(/[^A-Z0-9]/gi, "");
-
-    // ambil pola NIM valid — minimal 10 digit setelah H (standar NIM Untan)
-    const fix = raw.match(/H\d{10}|\d{10}/i);
-
-    if (fix) {
-      nim = fix[0].toUpperCase();
-    }
+    nim = nimMatch[1].trim().toUpperCase();
   }
-
-  // =======================
-  // FALLBACK NIM (ANTI GAGAL TOTAL)
-  // =======================
-  if (!nim) {
-    // =======================
-    // AMBIL NIM (SUPER STABIL + REKONSTRUKSI NIM TERBELAH)
-    // =======================
-    const all = clean.replace(/[^A-Z0-9]/gi, " ");
-
-    // Coba temukan NIM lengkap dulu
-    let candidates = all.match(/[A-Z]?\d{10,12}/g);
-
-    // Jika tidak ditemukan, coba rekonstruksi NIM yang terbelah lintas baris
-    // Contoh: "H103125106 4" → "H1031251064"
-    if (!candidates) {
-      const splitMatch = all.match(/\b(H\d{9})\s+(\d{1,3})\b/i);
-      if (splitMatch) {
-        const combined = splitMatch[1] + splitMatch[2];
-        if (/H\d{10,12}/i.test(combined)) {
-          candidates = [combined];
-        }
-      }
-    }
-
-    if (candidates && candidates.length > 0) {
-      // Prioritaskan NIM yang diawali H (format NIM Untan), baru fallback ke kandidat terakhir
-      const preferred = candidates.find(c => /^H\d{10}$/i.test(c));
-      nim = (preferred || candidates[candidates.length - 1]).toUpperCase();
-    }
-  }
-
-  // =======================
-  // FIX NAMA (BUANG ANGKA NYANGKUT)
-  // =======================
-  nama = nama.replace(/\s+\d+$/, "");
 
   return {
-    nama: toProperCase(fixNamaSpacing(nama.trim())),
-    nim: nim.trim().toUpperCase()
+    nama: toProperCase(fixNamaSpacing(nama)),
+    nim
   };
 }
 
