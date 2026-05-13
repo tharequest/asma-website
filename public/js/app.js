@@ -119,8 +119,7 @@ if (rows.length > 8) {
       header.innerHTML = `
         <th style="width:4rem;">No</th>
         <th>Nama Himpunan</th>
-        <th style="width:12rem;">Hari/Tanggal</th>
-        <th style="width:14rem;">Tempat</th>
+        <th style="width:14rem;">Hari/Tanggal</th>
         <th style="width:11rem;">Link Surat</th>
       `;
     } else {
@@ -149,7 +148,6 @@ if (rows.length > 8) {
           <td>${i + 1}</td>
           <td>${r.nama_himpunan}</td>
           <td>${r.hari_tanggal}</td>
-          <td>${r.tempat}</td>
           <td><a class="link" href="${r.link}" target="_blank">Lihat</a>
           <button onclick="hapusData(${i + 1}, '${r.link}')" class="btn-delete">Hapus</button>
           </td>
