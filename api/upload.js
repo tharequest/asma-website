@@ -3,6 +3,7 @@ import pdfParse from "pdf-parse";
 import { Readable } from "stream";
 
 const JENIS_WITH_YEAR = ["cuti_kuliah", "undur_diri", "pindah_kuliah"];
+const JENIS_KEGIATAN = ["izin_kegiatan"];
 
 export const config = {
   api: { bodyParser: false }
@@ -67,68 +68,78 @@ function extractNamaNim(text, jenis) {
 
   const clean = text
     .replace(/\r/g, "")
-    .replace(/\n/g, " ")
-    .replace(/\s+/g, " ")
-    .replace(/Dokumen ini telah.*?BSrE\./i, "")
+    .replace(/\n/g, "\n")
+    .replace(/Dokumen ini telah.*?BSrE\./is, "")
     .trim();
 
   // =======================
   // AMBIL NAMA
   // =======================
   const namaMatch = clean.match(
-  /nama\s*[:\-]?\s*(.+?)\s*(nomor|nim)/i
-);
+    /nama\s*:\s*(.+)/i
+  );
 
- if (namaMatch) {
-  nama = namaMatch[1].replace(/\d+/g, "").trim();
-}
+  if (namaMatch) {
+    nama = namaMatch[1]
+      .split("\n")[0]
+      .replace(/\d+/g, "")
+      .trim();
+  }
 
   // =======================
-  // AMBIL NIM (PRIMARY)
+  // AMBIL NIM
   // =======================
   const nimMatch = clean.match(
-    /(nim|nomor induk mahasiswa)\s*[:\-]?\s*([A-Z]?\s*\d[\d\s]{8,20})/i
+    /nomor induk mahasiswa\s*:\s*([A-Z0-9]+)/i
   );
 
   if (nimMatch) {
-    let raw = nimMatch[2];
-
-    // bersihin semua selain huruf & angka
-    raw = raw.replace(/[^A-Z0-9]/gi, "");
-
-    // ambil pola NIM valid
-    const fix = raw.match(/H\d{9,12}|\d{10,12}/i);
-
-    if (fix) {
-      nim = fix[0].toUpperCase();
-    }
+    nim = nimMatch[1].trim().toUpperCase();
   }
-
-  // =======================
-  // FALLBACK NIM (ANTI GAGAL TOTAL)
-  // =======================
-  if (!nim) {
-    // =======================
-// AMBIL NIM (SUPER STABIL)
-// =======================
-const all = clean.replace(/[^A-Z0-9]/gi, " ");
-
-const candidates = all.match(/[A-Z]?\d{10,12}/g);
-
-if (candidates && candidates.length > 0) {
-  nim = candidates[candidates.length - 1].toUpperCase();
-}
-  }
-
-  // =======================
-  // FIX NAMA (BUANG ANGKA NYANGKUT)
-  // =======================
-  nama = nama.replace(/\s+\d+$/, "");
 
   return {
-    nama: toProperCase(fixNamaSpacing(nama.trim())),
-    nim: nim.trim().toUpperCase()
+    nama: toProperCase(fixNamaSpacing(nama)),
+    nim
   };
+}
+
+// ===============================
+// PARSER IZIN KEGIATAN
+// ===============================
+function extractIzinKegiatan(text) {
+  const clean = text
+    .replace(/\r/g, "")
+    .replace(/Dokumen ini telah.*?BSrE\./is, "")
+    .trim();
+
+  // Nama himpunan: ambil singkatan dalam kurung PERTAMA antara "kepada ... Fakultas"
+  // Contoh: "kepada Himpunan Mahasiswa Geofisika (HMG) Fakultas" → "HMG"
+  //         "kepada Himpunan Mahasiswa Fisika (HIMAFIS) Fakultas" → "HIMAFIS"
+  // Tidak akan mengambil singkatan kegiatan seperti (ION), (Gempa) karena
+  // muncul SETELAH kata "Fakultas" — dijamin tidak salah tangkap
+  let nama_himpunan = "";
+  const namaMatch = clean.match(
+    /memberikan izin kepada\s+[^(]+\(([^)]+)\)\s+Fakultas/is
+  );
+  if (namaMatch) {
+    nama_himpunan = namaMatch[1].trim();
+  }
+
+  // Hari/tanggal: "hari/tanggal : Sabtu, 16 Mei 2026"
+  let hari_tanggal = "";
+  const hariMatch = clean.match(/hari\/tanggal\s*:\s*(.+)/i);
+  if (hariMatch) {
+    hari_tanggal = hariMatch[1].split("\n")[0].trim();
+  }
+
+  // Tempat: "tempat : Ruangan H3.1 Gedung Baru FMIPA Untan"
+  let tempat = "";
+  const tempatMatch = clean.match(/tempat\s*:\s*(.+)/i);
+  if (tempatMatch) {
+    tempat = tempatMatch[1].split("\n")[0].trim();
+  }
+
+  return { nama_himpunan, hari_tanggal, tempat };
 }
 
 // ===============================
@@ -150,6 +161,84 @@ export default async function handler(req, res) {
     const pdf = await pdfParse(buffer);
     const text = pdf.text;
 
+    // ─────────────────────────────────────────
+    // CABANG: IZIN KEGIATAN
+    // ─────────────────────────────────────────
+    if (JENIS_KEGIATAN.includes(jenis)) {
+      const { nama_himpunan, hari_tanggal, tempat } = extractIzinKegiatan(text);
+
+      if (!nama_himpunan || !hari_tanggal || !tempat) {
+        return res.json({
+          success: false,
+          error: "Data himpunan/tanggal/tempat tidak terbaca dari PDF"
+        });
+      }
+
+      // Cek duplikat: kombinasi nama_himpunan + hari_tanggal (kolom A+B)
+      const sheets = google.sheets({
+        version: "v4",
+        auth: getAuth(["https://www.googleapis.com/auth/spreadsheets"])
+      });
+
+      const sheetRes = await sheets.spreadsheets.values.get({
+        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        range: `${jenis}!A:B`
+      });
+
+      const existing = (sheetRes.data.values || []).slice(1);
+      const isDup = existing.some(
+        r => r[0] === nama_himpunan && r[1] === hari_tanggal
+      );
+
+      if (isDup) {
+        return res.json({
+          success: true,
+          duplicate: true,
+          nama: nama_himpunan,
+          nim: hari_tanggal
+        });
+      }
+
+      // Upload ke Drive
+      const drive = google.drive({
+        version: "v3",
+        auth: getAuth(["https://www.googleapis.com/auth/drive"])
+      });
+
+      const folderId = getDriveFolder(jenis);
+      const stream = Readable.from(buffer);
+
+      const up = await drive.files.create({
+        requestBody: {
+          name: `${nama_himpunan} - ${hari_tanggal}.pdf`,
+          parents: [folderId]
+        },
+        media: { mimeType: "application/pdf", body: stream },
+        fields: "id",
+        supportsAllDrives: true
+      });
+
+      const link = `https://drive.google.com/file/d/${up.data.id}/view`;
+
+      // Simpan ke sheet: nama_himpunan | hari_tanggal | tempat | link
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        range: `${jenis}!A:D`,
+        valueInputOption: "USER_ENTERED",
+        requestBody: { values: [[nama_himpunan, hari_tanggal, tempat, link]] }
+      });
+
+      return res.json({
+        success: true,
+        nama: nama_himpunan,
+        nim: hari_tanggal,
+        link
+      });
+    }
+
+    // ─────────────────────────────────────────
+    // CABANG: SURAT MAHASISWA (EXISTING)
+    // ─────────────────────────────────────────
     const { nama, nim } = extractNamaNim(text, jenis);
 
     if (!nama || !nim) {

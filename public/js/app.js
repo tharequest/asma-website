@@ -49,6 +49,7 @@ const tahunSelect = document.getElementById("tahun-select");
 const sheetLabel = document.getElementById("sheet-label");
 
 const jenisWithYear = ["cuti_kuliah", "undur_diri", "pindah_kuliah"];
+const jenisKegiatan = ["izin_kegiatan"];
 
 // ===============================
 // STATUS BAR
@@ -69,7 +70,7 @@ fileInput.addEventListener("change", () => {
     fileInfo.textContent = `${selectedFiles.length} file dipilih`;
 
     if (!jenisWithYear.includes(currentJenis)) {
-      // menu tanpa tahun → langsung bisa upload
+      // menu tanpa tahun (termasuk izin_kegiatan) → langsung bisa upload
       btnUpload.disabled = false;
     } else {
       // menu dengan tahun → tunggu pilih tahun
@@ -113,13 +114,24 @@ if (rows.length > 8) {
 }
     
     const header = document.getElementById("table-header");
-    header.innerHTML = `
-      <th style="width:4rem;">No</th>
-      <th>Nama</th>
-      <th style="width:9rem;">NIM</th>
-      <th style="width:11rem;">Link Surat</th>
-      ${jenisWithYear.includes(currentJenis) ? `<th style="width:6rem;">Tahun</th>` : ""}
-    `;
+
+    if (jenisKegiatan.includes(currentJenis)) {
+      header.innerHTML = `
+        <th style="width:4rem;">No</th>
+        <th>Nama Himpunan</th>
+        <th style="width:12rem;">Hari/Tanggal</th>
+        <th style="width:14rem;">Tempat</th>
+        <th style="width:11rem;">Link Surat</th>
+      `;
+    } else {
+      header.innerHTML = `
+        <th style="width:4rem;">No</th>
+        <th>Nama</th>
+        <th style="width:9rem;">NIM</th>
+        <th style="width:11rem;">Link Surat</th>
+        ${jenisWithYear.includes(currentJenis) ? `<th style="width:6rem;">Tahun</th>` : ""}
+      `;
+    }
 
     if (jenisWithYear.includes(currentJenis) && tahunSelect.value) {
       rows = rows.filter(r => r.tahun == tahunSelect.value);
@@ -131,6 +143,18 @@ if (rows.length > 8) {
           <td colspan="5" class="empty-row">Belum ada data.</td>
         </tr>
       `;
+    } else if (jenisKegiatan.includes(currentJenis)) {
+      tableBody.innerHTML = rows.map((r, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${r.nama_himpunan}</td>
+          <td>${r.hari_tanggal}</td>
+          <td>${r.tempat}</td>
+          <td><a class="link" href="${r.link}" target="_blank">Lihat</a>
+          <button onclick="hapusData(${i + 1}, '${r.link}')" class="btn-delete">Hapus</button>
+          </td>
+        </tr>
+      `).join("");
     } else {
       tableBody.innerHTML = rows.map((r, i) => `
         <tr>
@@ -259,7 +283,8 @@ document.querySelectorAll(".nav-item").forEach(item => {
       ket_lulus: "workspace_premium",
       cuti_kuliah: "event_busy",
       undur_diri: "exit_to_app",
-      pindah_kuliah: "transfer_within_a_station"
+      pindah_kuliah: "transfer_within_a_station",
+      izin_kegiatan: "event_available"
     };
     const iconEl = document.querySelector("#card-icon .material-icons-round");
     if (iconEl && iconMap[currentJenis]) iconEl.textContent = iconMap[currentJenis];

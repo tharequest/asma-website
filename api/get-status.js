@@ -38,7 +38,8 @@ function extractFileId(input) {
 
 export default async function handler(req, res) {
   try {
-    const { jenis } = req.query;
+    const jenis = req.query?.jenis;
+    const isKegiatan = jenis === "izin_kegiatan";
 
     if (!jenis) {
       return res.status(400).json({
@@ -56,26 +57,42 @@ export default async function handler(req, res) {
 
     const rows = response.data.values || [];
 
-    const data = rows
-      .slice(1)
-      .filter(r => r[0] && r[1] && r[2])
-      .map(r => {
-        const fileId = extractFileId(r[2]);
+    let data;
+    if (isKegiatan) {
+      // Kolom: nama_himpunan | hari_tanggal | tempat | lihat surat
+      data = rows
+        .slice(1)
+        .filter(r => r[0] && r[1] && r[3])
+        .map(r => {
+          const fileId = extractFileId(r[3]);
+          return {
+            nama_himpunan: r[0],
+            hari_tanggal: r[1],
+            tempat: r[2] || "-",
+            link: fileId
+              ? `https://drive.google.com/file/d/${fileId}/preview`
+              : "#"
+          };
+        });
+    } else {
+      // Kolom: nama | nim | lihat surat | tahun (opsional)
+      data = rows
+        .slice(1)
+        .filter(r => r[0] && r[1] && r[2])
+        .map(r => {
+          const fileId = extractFileId(r[2]);
+          return {
+            nama: r[0],
+            nim: r[1],
+            link: fileId
+              ? `https://drive.google.com/file/d/${fileId}/preview`
+              : "#",
+            tahun: r[3] || ""
+          };
+        });
+    }
 
-        return {
-          nama: r[0],
-          nim: r[1],
-          link: fileId
-            ? `https://drive.google.com/file/d/${fileId}/preview`
-            : "#",
-          tahun: r[3] || ""
-        };
-      });
-
-    return res.json({
-      success: true,
-      data
-    });
+    return res.json({ success: true, data });
 
   } catch (e) {
     console.error("GET STATUS ERROR:", e);
