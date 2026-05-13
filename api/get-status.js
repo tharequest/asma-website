@@ -50,12 +50,18 @@ export default async function handler(req, res) {
 
     const sheets = getSheets();
 
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `${jenis}!A:D`
-    });
-
-    const rows = response.data.values || [];
+    let rows = [];
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        range: `${jenis}!A:D`
+      });
+      rows = response.data.values || [];
+    } catch (sheetErr) {
+      // Sheet belum dibuat atau nama salah → kembalikan data kosong, bukan 500
+      console.warn(`Sheet "${jenis}" tidak ditemukan:`, sheetErr.message);
+      return res.json({ success: true, data: [] });
+    }
 
     let data;
     if (isKegiatan) {
