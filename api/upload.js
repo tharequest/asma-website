@@ -125,18 +125,19 @@ function extractIzinKegiatan(text) {
     nama_himpunan = namaMatch[1].trim();
   }
 
-  // Hari/tanggal: "hari/tanggal : Sabtu, 16 Mei 2026"
+  // Hari/tanggal: bisa "hari/tanggal : Sabtu, 16 Mei 2026"
+  // atau "hari/tanggal\n\n: Sabtu, 16 Mei 2026" (ada newline sebelum titik dua)
   let hari_tanggal = "";
-  const hariMatch = clean.match(/hari\/tanggal\s*:\s*(.+)/i);
+  const hariMatch = clean.match(/hari\/tanggal[\s]*:[\s]*([^\n]+)/i);
   if (hariMatch) {
-    hari_tanggal = hariMatch[1].split("\n")[0].trim();
+    hari_tanggal = hariMatch[1].trim();
   }
 
-  // Tempat: "tempat : Ruangan H3.1 Gedung Baru FMIPA Untan"
+  // Tempat: bisa "tempat : Ruangan..." atau "tempat\n\n: Ruangan..."
   let tempat = "";
-  const tempatMatch = clean.match(/tempat\s*:\s*(.+)/i);
+  const tempatMatch = clean.match(/tempat[\s]*:[\s]*([^\n]+)/i);
   if (tempatMatch) {
-    tempat = tempatMatch[1].split("\n")[0].trim();
+    tempat = tempatMatch[1].trim();
   }
 
   return { nama_himpunan, hari_tanggal, tempat };
@@ -167,10 +168,15 @@ export default async function handler(req, res) {
     if (JENIS_KEGIATAN.includes(jenis)) {
       const { nama_himpunan, hari_tanggal, tempat } = extractIzinKegiatan(text);
 
+      // DEBUG LOG — akan tampil di Vercel Logs
+      console.log("[izin_kegiatan] Extracted:", { nama_himpunan, hari_tanggal, tempat });
+      console.log("[izin_kegiatan] Text sample:", text.slice(200, 600));
+
       if (!nama_himpunan || !hari_tanggal || !tempat) {
+        console.log("[izin_kegiatan] GAGAL extract — cek regex");
         return res.json({
           success: false,
-          error: "Data himpunan/tanggal/tempat tidak terbaca dari PDF"
+          error: `Tidak terbaca: himpunan=${nama_himpunan||'?'}, tgl=${hari_tanggal||'?'}, tempat=${tempat||'?'}`
         });
       }
 
