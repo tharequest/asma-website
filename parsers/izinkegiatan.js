@@ -20,16 +20,12 @@ export function extract(text) {
   const clean = cleanText(text);
 
   // ── NAMA HIMPUNAN ─────────────────────────────
-  // Ambil singkatan dalam kurung PERTAMA setelah "memberikan izin kepada"
-  // dan sebelum kata "Fakultas" — dijamin tidak salah tangkap singkatan kegiatan.
-  //
-  // Catatan: pdf-parse (npm) kadang tidak menambahkan spasi antara ")"
-  // dan "Fakultas" saat ekstraksi teks PDF, sehingga "\s+" gagal match.
-  // Solusi: gunakan "\s*" (opsional) + fallback [\s\S]{0,30}? untuk kasus ekstrem.
+  // Cari singkatan dalam kurung yang langsung diikuti kata "Fakultas".
+  // Pola ini berlaku untuk semua himpunan: (HIMABIO), (HIMAFIS), (HIMASTA), (MSI), dll.
+  // Nomor telepon (0561) tidak ikut karena tidak diikuti "Fakultas".
+  // Singkatan kegiatan seperti (SIGMA) juga aman karena diikuti "yang", bukan "Fakultas".
   let nama_himpunan = "";
-  const namaMatch =
-    clean.match(/memberikan izin kepada\s+[^(]+\(([^)]+)\)\s*Fakultas/i) ||
-    clean.match(/memberikan izin kepada[^(]+\(([^)]+)\)[\s\S]{0,30}?Fakultas/i);
+  const namaMatch = clean.match(/\(([^)]+)\)\s*Fakultas/i);
   if (namaMatch) {
     nama_himpunan = namaMatch[1].trim();
   }
