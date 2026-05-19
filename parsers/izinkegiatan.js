@@ -37,7 +37,8 @@ export function extract(text) {
     pukul = pukulMatch[1].trim();
   }
 
-  // ── HARI / TANGGAL ────────────────────────────  let hari_tanggal = "";
+  // ── HARI / TANGGAL ────────────────────────────
+  let hari_tanggal = "";
   const hariMatch = clean.match(/hari\/tanggal[\s]*:[\s]*([^\n]+)/i);
   if (hariMatch) {
     hari_tanggal = hariMatch[1].trim();
