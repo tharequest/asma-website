@@ -54,7 +54,7 @@ export default async function handler(req, res) {
     try {
       const response = await sheets.spreadsheets.values.get({
         spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: `${jenis}!A:D`
+        range: `${jenis}!A:E`
       });
       rows = response.data.values || [];
     } catch (sheetErr) {
@@ -65,16 +65,17 @@ export default async function handler(req, res) {
 
     let data;
     if (isKegiatan) {
-      // Kolom: nama_himpunan | hari_tanggal | tempat | lihat surat
+      // Kolom: nama_himpunan | hari_tanggal | pukul | tempat | lihat surat
       data = rows
         .slice(1)
-        .filter(r => r[0] && r[1] && r[3])
+        .filter(r => r[0] && r[1] && r[4])
         .map(r => {
-          const fileId = extractFileId(r[3]);
+          const fileId = extractFileId(r[4]);
           return {
             nama_himpunan: r[0],
             hari_tanggal: r[1],
-            tempat: r[2] || "-",
+            pukul: r[2] || "-",
+            tempat: r[3] || "-",
             link: fileId
               ? `https://drive.google.com/file/d/${fileId}/preview`
               : "#"
