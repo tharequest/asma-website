@@ -21,11 +21,15 @@ export function extract(text) {
 
   // ── NAMA HIMPUNAN ─────────────────────────────
   // Ambil singkatan dalam kurung PERTAMA setelah "memberikan izin kepada"
-  // dan sebelum kata "Fakultas" — dijamin tidak salah tangkap singkatan kegiatan
+  // dan sebelum kata "Fakultas" — dijamin tidak salah tangkap singkatan kegiatan.
+  //
+  // Catatan: pdf-parse (npm) kadang tidak menambahkan spasi antara ")"
+  // dan "Fakultas" saat ekstraksi teks PDF, sehingga "\s+" gagal match.
+  // Solusi: gunakan "\s*" (opsional) + fallback [\s\S]{0,30}? untuk kasus ekstrem.
   let nama_himpunan = "";
-  const namaMatch = clean.match(
-    /memberikan izin kepada\s+[^(]+\(([^)]+)\)\s+Fakultas/is
-  );
+  const namaMatch =
+    clean.match(/memberikan izin kepada\s+[^(]+\(([^)]+)\)\s*Fakultas/i) ||
+    clean.match(/memberikan izin kepada[^(]+\(([^)]+)\)[\s\S]{0,30}?Fakultas/i);
   if (namaMatch) {
     nama_himpunan = namaMatch[1].trim();
   }
