@@ -30,8 +30,14 @@ export function extract(text) {
     nama_himpunan = namaMatch[1].trim();
   }
 
-  // ── HARI / TANGGAL ────────────────────────────
-  let hari_tanggal = "";
+  // ── PUKUL ─────────────────────────────────────
+  let pukul = "";
+  const pukulMatch = clean.match(/pukul[\s]*:[\s]*([^\n]+)/i);
+  if (pukulMatch) {
+    pukul = pukulMatch[1].trim();
+  }
+
+  // ── HARI / TANGGAL ────────────────────────────  let hari_tanggal = "";
   const hariMatch = clean.match(/hari\/tanggal[\s]*:[\s]*([^\n]+)/i);
   if (hariMatch) {
     hari_tanggal = hariMatch[1].trim();
@@ -44,5 +50,5 @@ export function extract(text) {
     tempat = tempatMatch[1].trim();
   }
 
-  return { nama_himpunan, hari_tanggal, tempat };
+  return { nama_himpunan, hari_tanggal, pukul, tempat };
 }

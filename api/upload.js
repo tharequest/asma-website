@@ -90,14 +90,14 @@ export default async function handler(req, res) {
 
     // ── CABANG: IZIN KEGIATAN ──────────────────
     if (JENIS_KEGIATAN.includes(jenis)) {
-      const { nama_himpunan, hari_tanggal, tempat } = parsed;
+      const { nama_himpunan, hari_tanggal, pukul, tempat } = parsed;
 
-      console.log("[izin_kegiatan] Extracted:", { nama_himpunan, hari_tanggal, tempat });
+      console.log("[izin_kegiatan] Extracted:", { nama_himpunan, hari_tanggal, pukul, tempat });
 
-      if (!nama_himpunan || !hari_tanggal || !tempat) {
+      if (!nama_himpunan || !hari_tanggal || !pukul || !tempat) {
         return res.json({
           success: false,
-          error: `Tidak terbaca: himpunan=${nama_himpunan || "?"}, tgl=${hari_tanggal || "?"}, tempat=${tempat || "?"}`
+          error: `Tidak terbaca: himpunan=${nama_himpunan || "?"}, tgl=${hari_tanggal || "?"}, pukul=${pukul || "?"}, tempat=${tempat || "?"}`
         });
       }
 
@@ -106,13 +106,13 @@ export default async function handler(req, res) {
         auth: getAuth(["https://www.googleapis.com/auth/spreadsheets"])
       });
 
-      // Cek duplikat: kombinasi nama_himpunan + hari_tanggal
+      // Cek duplikat: kombinasi nama_himpunan + hari_tanggal + pukul
       const sheetRes = await sheets.spreadsheets.values.get({
         spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: `${jenis}!A:B`
+        range: `${jenis}!A:C`
       });
       const existing = (sheetRes.data.values || []).slice(1);
-      const isDup = existing.some(r => r[0] === nama_himpunan && r[1] === hari_tanggal);
+      const isDup = existing.some(r => r[0] === nama_himpunan && r[1] === hari_tanggal && r[2] === pukul);
       if (isDup) {
         return res.json({ success: true, duplicate: true, nama: nama_himpunan, nim: hari_tanggal });
       }
@@ -125,7 +125,7 @@ export default async function handler(req, res) {
       const folderId = getDriveFolder(jenis);
       const up = await drive.files.create({
         requestBody: {
-          name: `${nama_himpunan} - ${hari_tanggal}.pdf`,
+          name: `${nama_himpunan} - ${hari_tanggal} ${pukul}.pdf`,
           parents: [folderId]
         },
         media: { mimeType: "application/pdf", body: Readable.from(buffer) },
@@ -134,12 +134,12 @@ export default async function handler(req, res) {
       });
       const link = `https://drive.google.com/file/d/${up.data.id}/view`;
 
-      // Simpan ke sheet: nama_himpunan | hari_tanggal | tempat | link
+      // Simpan ke sheet: nama_himpunan | hari_tanggal | pukul | tempat | link
       await sheets.spreadsheets.values.append({
         spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: `${jenis}!A:D`,
+        range: `${jenis}!A:E`,
         valueInputOption: "USER_ENTERED",
-        requestBody: { values: [[nama_himpunan, hari_tanggal, tempat, link]] }
+        requestBody: { values: [[nama_himpunan, hari_tanggal, pukul, tempat, link]] }
       });
 
       return res.json({ success: true, nama: nama_himpunan, nim: hari_tanggal, link });
