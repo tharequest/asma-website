@@ -46,8 +46,23 @@ function getAuth(scopes) {
 
 // ── Util: Drive folder per jenis ──────────────
 function getDriveFolder(jenis) {
-  const map = JSON.parse(process.env.GOOGLE_DRIVE_FOLDER_MAP || "{}");
-  return map[jenis] || map.aktif_kuliah;
+  const raw = process.env.GOOGLE_DRIVE_FOLDER_MAP || "{}";
+  let map;
+  try {
+    map = JSON.parse(raw);
+  } catch (e) {
+    // Kasih pesan jelas supaya mudah debug di Vercel logs
+    throw new Error(
+      `GOOGLE_DRIVE_FOLDER_MAP bukan JSON valid. Cek env var di Vercel. Detail: ${e.message}`
+    );
+  }
+  const folderId = map[jenis] || map.aktif_kuliah;
+  if (!folderId) {
+    throw new Error(
+      `Folder ID untuk jenis "${jenis}" tidak ditemukan di GOOGLE_DRIVE_FOLDER_MAP`
+    );
+  }
+  return folderId;
 }
 
 // ── Main Handler ───────────────────────────────
