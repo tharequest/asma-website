@@ -2,16 +2,33 @@ import { google } from "googleapis";
 import pdfParse from "pdf-parse";
 import { Readable } from "stream";
 
-const JENIS_WITH_YEAR = ["cuti_kuliah", "undur_diri", "pindah_kuliah"];
-const JENIS_KEGIATAN = ["izin_kegiatan"];
+// ── Import semua parser ────────────────────────
+import { extract as extractAktifKuliah }  from "../parsers/aktifkuliah.js";
+import { extract as extractKetLulus }     from "../parsers/ketlulus.js";
+import { extract as extractCuti }         from "../parsers/cuti.js";
+import { extract as extractUndurDiri }    from "../parsers/undirdiri.js";
+import { extract as extractPindahKuliah } from "../parsers/pindahkuliah.js";
+import { extract as extractIzinKegiatan } from "../parsers/izinkegiatan.js";
+
+// ── Konstanta ──────────────────────────────────
+const JENIS_WITH_YEAR   = ["cuti_kuliah", "undur_diri", "pindah_kuliah"];
+const JENIS_KEGIATAN    = ["izin_kegiatan"];
 
 export const config = {
   api: { bodyParser: false }
 };
 
-// ===============================
-// UTIL: READ BUFFER
-// ===============================
+// ── Router parser ──────────────────────────────
+const PARSER_MAP = {
+  aktif_kuliah:  extractAktifKuliah,
+  ket_lulus:     extractKetLulus,
+  cuti_kuliah:   extractCuti,
+  undur_diri:    extractUndurDiri,
+  pindah_kuliah: extractPindahKuliah,
+  izin_kegiatan: extractIzinKegiatan,
+};
+
+// ── Util: baca buffer dari request ────────────
 function bufferFromReq(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -21,131 +38,19 @@ function bufferFromReq(req) {
   });
 }
 
-// ===============================
-// UTIL: GOOGLE AUTH
-// ===============================
+// ── Util: Google Auth ──────────────────────────
 function getAuth(scopes) {
   const sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
-  return new google.auth.JWT(
-    sa.client_email,
-    null,
-    sa.private_key,
-    scopes
-  );
+  return new google.auth.JWT(sa.client_email, null, sa.private_key, scopes);
 }
 
-// ===============================
-// UTIL: DRIVE FOLDER MAP
-// ===============================
+// ── Util: Drive folder per jenis ──────────────
 function getDriveFolder(jenis) {
   const map = JSON.parse(process.env.GOOGLE_DRIVE_FOLDER_MAP || "{}");
   return map[jenis] || map.aktif_kuliah;
 }
 
-// ===============================
-// FORMAT NAMA
-// ===============================
-function toProperCase(str) {
-  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-}
-
-function fixNamaSpacing(nama) {
-  nama = nama.replace(/([a-z])([A-Z])/g, "$1 $2");
-
-  if (!nama.includes(" ")) {
-    nama = nama.replace(/([a-z]{4,})(?=[a-z]{4,})/gi, "$1 ");
-  }
-
-  return nama;
-}
-
-// ===============================
-// PARSER NAMA & NIM (FINAL STABLE)
-// ===============================
-function extractNamaNim(text, jenis) {
-  let nama = "";
-  let nim = "";
-
-  const clean = text
-    .replace(/\r/g, "")
-    .replace(/\n/g, "\n")
-    .replace(/Dokumen ini telah.*?BSrE\./is, "")
-    .trim();
-
-  // =======================
-  // AMBIL NAMA
-  // =======================
-  const namaMatch = clean.match(
-    /nama\s*:\s*(.+)/i
-  );
-
-  if (namaMatch) {
-    nama = namaMatch[1]
-      .split("\n")[0]
-      .replace(/\d+/g, "")
-      .trim();
-  }
-
-  // =======================
-  // AMBIL NIM
-  // =======================
-  const nimMatch = clean.match(
-    /nomor induk mahasiswa\s*:\s*([A-Z0-9]+)/i
-  );
-
-  if (nimMatch) {
-    nim = nimMatch[1].trim().toUpperCase();
-  }
-
-  return {
-    nama: toProperCase(fixNamaSpacing(nama)),
-    nim
-  };
-}
-
-// ===============================
-// PARSER IZIN KEGIATAN
-// ===============================
-function extractIzinKegiatan(text) {
-  const clean = text
-    .replace(/\r/g, "")
-    .replace(/Dokumen ini telah.*?BSrE\./is, "")
-    .trim();
-
-  // Nama himpunan: ambil singkatan dalam kurung PERTAMA antara "kepada ... Fakultas"
-  // Contoh: "kepada Himpunan Mahasiswa Geofisika (HMG) Fakultas" → "HMG"
-  //         "kepada Himpunan Mahasiswa Fisika (HIMAFIS) Fakultas" → "HIMAFIS"
-  // Tidak akan mengambil singkatan kegiatan seperti (ION), (Gempa) karena
-  // muncul SETELAH kata "Fakultas" — dijamin tidak salah tangkap
-  let nama_himpunan = "";
-  const namaMatch = clean.match(
-    /memberikan izin kepada\s+[^(]+\(([^)]+)\)\s+Fakultas/is
-  );
-  if (namaMatch) {
-    nama_himpunan = namaMatch[1].trim();
-  }
-
-  // Hari/tanggal: bisa "hari/tanggal : Sabtu, 16 Mei 2026"
-  // atau "hari/tanggal\n\n: Sabtu, 16 Mei 2026" (ada newline sebelum titik dua)
-  let hari_tanggal = "";
-  const hariMatch = clean.match(/hari\/tanggal[\s]*:[\s]*([^\n]+)/i);
-  if (hariMatch) {
-    hari_tanggal = hariMatch[1].trim();
-  }
-
-  // Tempat: bisa "tempat : Ruangan..." atau "tempat\n\n: Ruangan..."
-  let tempat = "";
-  const tempatMatch = clean.match(/tempat[\s]*:[\s]*([^\n]+)/i);
-  if (tempatMatch) {
-    tempat = tempatMatch[1].trim();
-  }
-
-  return { nama_himpunan, hari_tanggal, tempat };
-}
-
-// ===============================
-// HANDLER
-// ===============================
+// ── Main Handler ───────────────────────────────
 export default async function handler(req, res) {
   try {
     if (req.method !== "POST") {
@@ -153,56 +58,48 @@ export default async function handler(req, res) {
     }
 
     const jenis = req.query?.jenis || "aktif_kuliah";
-    const tahun = JENIS_WITH_YEAR.includes(jenis)
-      ? req.query?.tahun
-      : "";
+    const tahun = JENIS_WITH_YEAR.includes(jenis) ? (req.query?.tahun || "") : "";
 
+    // Validasi jenis
+    if (!PARSER_MAP[jenis]) {
+      return res.status(400).json({ success: false, error: `Jenis tidak dikenal: ${jenis}` });
+    }
+
+    // Parse PDF
     const buffer = await bufferFromReq(req);
+    const { text } = await pdfParse(buffer);
 
-    const pdf = await pdfParse(buffer);
-    const text = pdf.text;
+    // Jalankan parser sesuai jenis
+    const parser = PARSER_MAP[jenis];
+    const parsed = parser(text);
 
-    // ─────────────────────────────────────────
-    // CABANG: IZIN KEGIATAN
-    // ─────────────────────────────────────────
+    // ── CABANG: IZIN KEGIATAN ──────────────────
     if (JENIS_KEGIATAN.includes(jenis)) {
-      const { nama_himpunan, hari_tanggal, tempat } = extractIzinKegiatan(text);
+      const { nama_himpunan, hari_tanggal, tempat } = parsed;
 
-      // DEBUG LOG — akan tampil di Vercel Logs
       console.log("[izin_kegiatan] Extracted:", { nama_himpunan, hari_tanggal, tempat });
-      console.log("[izin_kegiatan] Text sample:", text.slice(200, 600));
 
       if (!nama_himpunan || !hari_tanggal || !tempat) {
-        console.log("[izin_kegiatan] GAGAL extract — cek regex");
         return res.json({
           success: false,
-          error: `Tidak terbaca: himpunan=${nama_himpunan||'?'}, tgl=${hari_tanggal||'?'}, tempat=${tempat||'?'}`
+          error: `Tidak terbaca: himpunan=${nama_himpunan || "?"}, tgl=${hari_tanggal || "?"}, tempat=${tempat || "?"}`
         });
       }
 
-      // Cek duplikat: kombinasi nama_himpunan + hari_tanggal (kolom A+B)
       const sheets = google.sheets({
         version: "v4",
         auth: getAuth(["https://www.googleapis.com/auth/spreadsheets"])
       });
 
+      // Cek duplikat: kombinasi nama_himpunan + hari_tanggal
       const sheetRes = await sheets.spreadsheets.values.get({
         spreadsheetId: process.env.GOOGLE_SHEET_ID,
         range: `${jenis}!A:B`
       });
-
       const existing = (sheetRes.data.values || []).slice(1);
-      const isDup = existing.some(
-        r => r[0] === nama_himpunan && r[1] === hari_tanggal
-      );
-
+      const isDup = existing.some(r => r[0] === nama_himpunan && r[1] === hari_tanggal);
       if (isDup) {
-        return res.json({
-          success: true,
-          duplicate: true,
-          nama: nama_himpunan,
-          nim: hari_tanggal
-        });
+        return res.json({ success: true, duplicate: true, nama: nama_himpunan, nim: hari_tanggal });
       }
 
       // Upload ke Drive
@@ -210,20 +107,16 @@ export default async function handler(req, res) {
         version: "v3",
         auth: getAuth(["https://www.googleapis.com/auth/drive"])
       });
-
       const folderId = getDriveFolder(jenis);
-      const stream = Readable.from(buffer);
-
       const up = await drive.files.create({
         requestBody: {
           name: `${nama_himpunan} - ${hari_tanggal}.pdf`,
           parents: [folderId]
         },
-        media: { mimeType: "application/pdf", body: stream },
+        media: { mimeType: "application/pdf", body: Readable.from(buffer) },
         fields: "id",
         supportsAllDrives: true
       });
-
       const link = `https://drive.google.com/file/d/${up.data.id}/view`;
 
       // Simpan ke sheet: nama_himpunan | hari_tanggal | tempat | link
@@ -234,79 +127,51 @@ export default async function handler(req, res) {
         requestBody: { values: [[nama_himpunan, hari_tanggal, tempat, link]] }
       });
 
-      return res.json({
-        success: true,
-        nama: nama_himpunan,
-        nim: hari_tanggal,
-        link
-      });
+      return res.json({ success: true, nama: nama_himpunan, nim: hari_tanggal, link });
     }
 
-    // ─────────────────────────────────────────
-    // CABANG: SURAT MAHASISWA (EXISTING)
-    // ─────────────────────────────────────────
-    const { nama, nim } = extractNamaNim(text, jenis);
+    // ── CABANG: SURAT MAHASISWA ────────────────
+    const { nama, nim } = parsed;
+
+    console.log(`[${jenis}] Extracted:`, { nama, nim });
 
     if (!nama || !nim) {
-      return res.json({
-        success: false,
-        error: "Nama / NIM tidak terbaca"
-      });
+      return res.json({ success: false, error: "Nama / NIM tidak terbaca" });
     }
 
-    // ===============================
-    // CEK DUPLIKAT
-    // ===============================
     const sheets = google.sheets({
       version: "v4",
       auth: getAuth(["https://www.googleapis.com/auth/spreadsheets"])
     });
 
+    // Cek duplikat NIM di kolom B
     const sheetRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
       range: `${jenis}!B:B`
     });
-
     const existingNIM = (sheetRes.data.values || []).flat();
-
     if (existingNIM.includes(nim)) {
-      return res.json({
-        success: true,
-        duplicate: true,
-        nama,
-        nim
-      });
+      return res.json({ success: true, duplicate: true, nama, nim });
     }
 
-    // ===============================
-    // UPLOAD DRIVE
-    // ===============================
+    // Upload ke Drive
     const drive = google.drive({
       version: "v3",
       auth: getAuth(["https://www.googleapis.com/auth/drive"])
     });
-
     const folderId = getDriveFolder(jenis);
-    const stream = Readable.from(buffer);
-
     const up = await drive.files.create({
       requestBody: {
         name: `${nama} - ${nim}.pdf`,
         parents: [folderId]
       },
-      media: {
-        mimeType: "application/pdf",
-        body: stream
-      },
+      media: { mimeType: "application/pdf", body: Readable.from(buffer) },
       fields: "id",
       supportsAllDrives: true
     });
-
     const link = `https://drive.google.com/file/d/${up.data.id}/view`;
 
-    // ===============================
-    // SIMPAN KE SHEET
-    // ===============================
+    // Simpan ke sheet
     const row = JENIS_WITH_YEAR.includes(jenis)
       ? [nama, nim, link, tahun]
       : [nama, nim, link];
@@ -315,23 +180,13 @@ export default async function handler(req, res) {
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
       range: `${jenis}!A:D`,
       valueInputOption: "USER_ENTERED",
-      requestBody: {
-        values: [row]
-      }
+      requestBody: { values: [row] }
     });
 
-    return res.json({
-      success: true,
-      nama,
-      nim,
-      link
-    });
+    return res.json({ success: true, nama, nim, link });
 
   } catch (e) {
     console.error("UPLOAD ERROR:", e);
-    return res.status(500).json({
-      success: false,
-      error: e.message
-    });
+    return res.status(500).json({ success: false, error: e.message });
   }
 }
