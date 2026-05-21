@@ -146,9 +146,9 @@ export default async function handler(req, res) {
     }
 
     // ── CABANG: SURAT MAHASISWA ────────────────
-    const { nama, nim } = parsed;
+    const { nama, nim, keperluan } = parsed;
 
-    console.log(`[${jenis}] Extracted:`, { nama, nim });
+    console.log(`[${jenis}] Extracted:`, { nama, nim, keperluan });
 
     if (!nama || !nim) {
       return res.json({ success: false, error: "Nama / NIM tidak terbaca" });
@@ -159,13 +159,26 @@ export default async function handler(req, res) {
       auth: getAuth(["https://www.googleapis.com/auth/spreadsheets"])
     });
 
-    // Cek duplikat NIM di kolom B
+    // Cek duplikat:
+    // - aktif_kuliah: NIM + keperluan (satu mahasiswa bisa punya banyak surat beda keperluan)
+    // - surat lain  : NIM saja
+    const isAktif = jenis === "aktif_kuliah";
+    const dupRange = isAktif ? `${jenis}!A:C` : `${jenis}!B:B`;
     const sheetRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `${jenis}!B:B`
+      range: dupRange
     });
-    const existingNIM = (sheetRes.data.values || []).flat();
-    if (existingNIM.includes(nim)) {
+
+    let isDup = false;
+    if (isAktif) {
+      const existing = (sheetRes.data.values || []).slice(1);
+      isDup = existing.some(r => r[1] === nim && r[2] === keperluan);
+    } else {
+      const existingNIM = (sheetRes.data.values || []).flat();
+      isDup = existingNIM.includes(nim);
+    }
+
+    if (isDup) {
       return res.json({ success: true, duplicate: true, nama, nim });
     }
 
@@ -187,9 +200,13 @@ export default async function handler(req, res) {
     const link = `https://drive.google.com/file/d/${up.data.id}/view`;
 
     // Simpan ke sheet
-    const row = JENIS_WITH_YEAR.includes(jenis)
-      ? [nama, nim, link, tahun]
-      : [nama, nim, link];
+    // aktif_kuliah: nama | nim | keperluan | link
+    // surat lain  : nama | nim | link | (tahun opsional)
+    const row = isAktif
+      ? [nama, nim, keperluan || "", link]
+      : JENIS_WITH_YEAR.includes(jenis)
+        ? [nama, nim, link, tahun]
+        : [nama, nim, link];
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,

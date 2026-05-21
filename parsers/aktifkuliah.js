@@ -35,5 +35,16 @@ export function extract(text) {
   const nimMatch = clean.match(/nomor induk mahasiswa\s*:\s*([A-Z0-9]+)/i);
   if (nimMatch) nim = nimMatch[1].trim().toUpperCase();
 
-  return { nama: formatNama(nama), nim };
+  // ── KEPERLUAN ─────────────────────────────────
+  // Ambil tujuan surat dari kalimat "untuk melengkapi persyaratan ..."
+  // atau "untuk keperluan ..." — dipakai sebagai pembeda duplikat.
+  let keperluan = "";
+  const keperluanMatch = clean.match(
+    /(?:untuk melengkapi persyaratan|untuk keperluan)\s+(.+?)[\.\n]/i
+  );
+  if (keperluanMatch) {
+    keperluan = keperluanMatch[1].trim();
+  }
+
+  return { nama: formatNama(nama), nim, keperluan };
 }
