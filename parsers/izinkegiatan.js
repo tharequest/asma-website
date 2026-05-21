@@ -21,14 +21,15 @@ export function extract(text) {
 
   // ── NAMA HIMPUNAN ─────────────────────────────
   // Pola 1: ada singkatan dalam kurung → (HIMABIO) Fakultas, (MSI) Fakultas, dll.
-  // Pola 2: tidak ada kurung → "Art Laboratory Fakultas" — tangkap kata sebelum Fakultas.
-  //   Dibatasi ke max 5 kata agar tidak tangkap kalimat panjang.
+  // Pola 2: tidak ada kurung → "Art Laboratory Fakultas"
+  //   Pakai .+? dengan flag s (dotAll) agar newline di tengah nama juga tertangkap.
+  //   Hasil dinormalisasi: newline/spasi berlebih → satu spasi.
   let nama_himpunan = "";
   const namaMatch =
     clean.match(/\(([^)]+)\)\s*Fakultas/i) ||
-    clean.match(/memberikan izin kepada\s+((?:\S+\s+){0,4}\S+?)\s*Fakultas/i);
+    clean.match(/memberikan izin kepada\s+(.+?)\s*Fakultas/is);
   if (namaMatch) {
-    nama_himpunan = namaMatch[1].trim();
+    nama_himpunan = namaMatch[1].trim().replace(/\s+/g, " ");
   }
 
   // ── PUKUL ─────────────────────────────────────
