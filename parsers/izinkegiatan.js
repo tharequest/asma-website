@@ -20,16 +20,14 @@ export function extract(text) {
   const clean = cleanText(text);
 
   // ── NAMA HIMPUNAN ─────────────────────────────
-  // Pola 1: ada singkatan dalam kurung → (HIMABIO) Fakultas, (MSI) Fakultas, dll.
-  // Pola 2: tidak ada kurung → "Art Laboratory Fakultas"
-  //   Pakai .+? dengan flag s (dotAll) agar newline di tengah nama juga tertangkap.
-  //   Hasil dinormalisasi: newline/spasi berlebih → satu spasi.
+  // Khusus Art Laboratory: tidak punya tanda kurung, langsung deteksi dari teks.
+  // Himpunan lain: ambil singkatan dalam kurung yang diikuti kata "Fakultas".
   let nama_himpunan = "";
-  const namaMatch =
-    clean.match(/\(([^)]+)\)\s*Fakultas/i) ||
-    clean.match(/memberikan izin kepada\s+(.+?)\s*Fakultas/is);
-  if (namaMatch) {
-    nama_himpunan = namaMatch[1].trim().replace(/\s+/g, " ");
+  if (/art\s+laboratory/i.test(clean)) {
+    nama_himpunan = "Art Laboratory";
+  } else {
+    const namaMatch = clean.match(/\(([^)]+)\)\s*Fakultas/i);
+    if (namaMatch) nama_himpunan = namaMatch[1].trim();
   }
 
   // ── PUKUL ─────────────────────────────────────
