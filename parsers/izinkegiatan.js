@@ -20,12 +20,13 @@ export function extract(text) {
   const clean = cleanText(text);
 
   // ── NAMA HIMPUNAN ─────────────────────────────
-  // Cari singkatan dalam kurung yang langsung diikuti kata "Fakultas".
-  // Pola ini berlaku untuk semua himpunan: (HIMABIO), (HIMAFIS), (HIMASTA), (MSI), dll.
-  // Nomor telepon (0561) tidak ikut karena tidak diikuti "Fakultas".
-  // Singkatan kegiatan seperti (SIGMA) juga aman karena diikuti "yang", bukan "Fakultas".
+  // Pola 1: ada singkatan dalam kurung → (HIMABIO) Fakultas, (MSI) Fakultas, dll.
+  // Pola 2: tidak ada kurung → "Art Laboratory Fakultas" — tangkap kata sebelum Fakultas.
+  //   Dibatasi ke max 5 kata agar tidak tangkap kalimat panjang.
   let nama_himpunan = "";
-  const namaMatch = clean.match(/\(([^)]+)\)\s*Fakultas/i);
+  const namaMatch =
+    clean.match(/\(([^)]+)\)\s*Fakultas/i) ||
+    clean.match(/memberikan izin kepada\s+((?:\S+\s+){0,4}\S+?)\s*Fakultas/i);
   if (namaMatch) {
     nama_himpunan = namaMatch[1].trim();
   }
