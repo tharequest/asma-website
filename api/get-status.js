@@ -82,19 +82,21 @@ export default async function handler(req, res) {
           };
         });
     } else {
-      // Kolom: nama | nim | lihat surat | tahun (opsional)
+      // aktif_kuliah: nama | nim | keperluan | lihat surat
+      // surat lain  : nama | nim | lihat surat | tahun (opsional)
+      const isAktif = jenis === "aktif_kuliah";
       data = rows
         .slice(1)
-        .filter(r => r[0] && r[1] && r[2])
+        .filter(r => r[0] && r[1] && (isAktif ? r[3] : r[2]))
         .map(r => {
-          const fileId = extractFileId(r[2]);
+          const fileId = isAktif ? extractFileId(r[3]) : extractFileId(r[2]);
           return {
             nama: r[0],
             nim: r[1],
             link: fileId
               ? `https://drive.google.com/file/d/${fileId}/preview`
               : "#",
-            tahun: r[3] || ""
+            tahun: isAktif ? "" : (r[3] || "")
           };
         });
     }

@@ -36,13 +36,13 @@ export function extract(text) {
   if (nimMatch) nim = nimMatch[1].trim().toUpperCase();
 
   // ── KEPERLUAN ─────────────────────────────────
-  // Ambil tujuan surat dari "untuk melengkapi persyaratan ..."
-  // Normalize whitespace dulu karena pdf-parse sering sisipkan newline
-  // di tengah kalimat saat word-wrap, sehingga (.+?) gagal melewatinya.
+  // Pola: "untuk melengkapi persyaratan ..." (ada "untuk")
+  //    atau "dibuat melengkapi persyaratan ..."  (tanpa "untuk" — ada di beberapa surat)
+  // Normalize whitespace dulu karena pdf-parse sering sisipkan newline di tengah kalimat.
   let keperluan = "";
   const cleanOneLine = clean.replace(/\s+/g, " ");
   const keperluanMatch = cleanOneLine.match(
-    /(?:untuk melengkapi persyaratan|untuk keperluan)\s+(.+?)\./i
+    /(?:untuk\s+)?melengkapi persyaratan\s+(.+?)\./i
   );
   if (keperluanMatch) {
     keperluan = keperluanMatch[1].trim();
