@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { requireAuth } from "./_auth.js";
 
 function getAuth() {
   const sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
@@ -31,6 +32,9 @@ function extractFileId(input) {
 
 export default async function handler(req, res) {
   try {
+    // 🔐 Cek autentikasi
+    if (!requireAuth(req, res)) return;
+
     const { jenis, rowIndex, link } = req.body;
 
     if (!jenis || rowIndex === undefined) {

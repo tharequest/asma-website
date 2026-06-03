@@ -1,5 +1,16 @@
-if (!localStorage.getItem("asmaLogin")) {
-  window.location.href = "/login.html";
+// 🔐 Auth guard (sudah dicek di <head>, ini backup)
+const _authToken = localStorage.getItem("asmaToken");
+if (!_authToken) {
+  window.location.replace("/login.html");
+}
+
+// Helper: tambahkan token ke setiap fetch ke /api/
+function apiFetch(url, options = {}) {
+  const token = localStorage.getItem("asmaToken") || "";
+  const headers = Object.assign({}, options.headers || {}, {
+    "x-asma-token": token
+  });
+  return fetch(url, Object.assign({}, options, { headers }));
 }
 
 console.log("ASMA Web UI Ready 🌐");
@@ -96,7 +107,7 @@ async function loadTable() {
   setStatus("Mengambil data...");
 
   try {
-    const res = await fetch(`/api/get-status?jenis=${currentJenis}`);
+    const res = await apiFetch(`/api/get-status?jenis=${currentJenis}`);
     const json = await res.json();
 
     if (!json.success) throw new Error("Gagal load");
@@ -204,7 +215,7 @@ btnUpload.addEventListener("click", async () => {
         const formData = new FormData();
         formData.append("file", file);
 
-        const res = await fetch(
+        const res = await apiFetch(
           `/api/upload?jenis=${currentJenis}&tahun=${tahunVal}`,
           {
             method: "POST",
@@ -310,7 +321,7 @@ setStatus("Siap.");
 async function hapusData(rowIndex, link) {
   if (!confirm("Yakin mau hapus surat ini?")) return;
 
-  const res = await fetch("/api/delete", {
+  const res = await apiFetch("/api/delete", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -331,6 +342,6 @@ async function hapusData(rowIndex, link) {
 }
 //untuk keluar
 function logout() {
-  localStorage.removeItem("asmaLogin");
+  localStorage.removeItem("asmaToken");
   window.location.href = "/login.html";
 }

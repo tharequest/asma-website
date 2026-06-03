@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import crypto from "crypto";
 
 function getAuth() {
   const sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
@@ -9,6 +10,30 @@ function getAuth() {
     sa.private_key,
     ["https://www.googleapis.com/auth/spreadsheets.readonly"]
   );
+}
+
+// Buat HMAC token dari username + timestamp
+function generateToken(username) {
+  const secret = process.env.API_SECRET_TOKEN;
+  if (!secret) throw new Error("API_SECRET_TOKEN tidak diset di Vercel env");
+  const payload = `${username}:${Date.now()}`;
+  const hmac = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+  return `${Buffer.from(payload).toString("base64")}.${hmac}`;
+}
+
+// Verifikasi token: cek HMAC valid (tidak expired check untuk simplisitas)
+export function verifyToken(token) {
+  try {
+    const secret = process.env.API_SECRET_TOKEN;
+    if (!secret) return false;
+    const [payloadB64, hmac] = token.split(".");
+    if (!payloadB64 || !hmac) return false;
+    const payload = Buffer.from(payloadB64, "base64").toString();
+    const expected = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+    return crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(expected));
+  } catch {
+    return false;
+  }
 }
 
 export default async function handler(req, res) {
@@ -46,7 +71,8 @@ export default async function handler(req, res) {
       return res.json({ success: false });
     }
 
-    return res.json({ success: true });
+    const token = generateToken(username);
+    return res.json({ success: true, token });
 
   } catch (e) {
     console.error("LOGIN ERROR:", e);

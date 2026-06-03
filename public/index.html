@@ -2,6 +2,15 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
+  <!-- 🔐 Auth guard — harus paling awal, sebelum render apapun -->
+  <script>
+    (function() {
+      var token = localStorage.getItem("asmaToken");
+      if (!token) {
+        window.location.replace("/login.html");
+      }
+    })();
+  </script>
   <title>ASMA — Aplikasi Surat Mahasiswa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="preconnect" href="https://fonts.googleapis.com">

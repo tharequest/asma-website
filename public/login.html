@@ -544,7 +544,7 @@ async function login(e) {
     if (data.success) {
       btn.textContent = '✓ Berhasil!';
       btn.style.background = 'linear-gradient(135deg, #059669, #34d399)';
-      localStorage.setItem('asmaLogin', 'true');
+      localStorage.setItem('asmaToken', data.token);
       setTimeout(() => { window.location.href = '/'; }, 600);
     } else {
       const wrap = document.querySelector('.login-form-wrap');

@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 import pdfParse from "pdf-parse";
 import { Readable } from "stream";
+import { requireAuth } from "./_auth.js";
 
 // ── Import semua parser ────────────────────────
 import { extract as extractAktifKuliah }  from "../parsers/aktifkuliah.js";
@@ -68,6 +69,9 @@ function getDriveFolder(jenis) {
 // ── Main Handler ───────────────────────────────
 export default async function handler(req, res) {
   try {
+    // 🔐 Cek autentikasi
+    if (!requireAuth(req, res)) return;
+
     if (req.method !== "POST") {
       return res.status(405).json({ success: false });
     }

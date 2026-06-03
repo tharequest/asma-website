@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { requireAuth } from "./_auth.js";
 
 function getSheets() {
   const sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
@@ -38,6 +39,9 @@ function extractFileId(input) {
 
 export default async function handler(req, res) {
   try {
+    // 🔐 Cek autentikasi
+    if (!requireAuth(req, res)) return;
+
     const jenis = req.query?.jenis;
     const isKegiatan = jenis === "izin_kegiatan";
 
