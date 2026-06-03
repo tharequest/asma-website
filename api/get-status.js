@@ -72,8 +72,9 @@ export default async function handler(req, res) {
       // Kolom: nama_himpunan | hari_tanggal | pukul | tempat | lihat surat
       data = rows
         .slice(1)
-        .filter(r => r[0] && r[1] && r[4])
-        .map(r => {
+        .map((r, idx) => ({ r, _rowIndex: idx + 1 })) // idx+1 = posisi asli di sheet (1-based, setelah header)
+        .filter(({ r }) => r[0] && r[1] && r[4])
+        .map(({ r, _rowIndex }) => {
           const fileId = extractFileId(r[4]);
           return {
             nama_himpunan: r[0],
@@ -82,7 +83,8 @@ export default async function handler(req, res) {
             tempat: r[3] || "-",
             link: fileId
               ? `https://drive.google.com/file/d/${fileId}/preview`
-              : "#"
+              : "#",
+            _rowIndex
           };
         });
     } else {
@@ -91,8 +93,9 @@ export default async function handler(req, res) {
       const isAktif = jenis === "aktif_kuliah";
       data = rows
         .slice(1)
-        .filter(r => r[0] && r[1] && (isAktif ? r[3] : r[2]))
-        .map(r => {
+        .map((r, idx) => ({ r, _rowIndex: idx + 1 })) // idx+1 = posisi asli di sheet (1-based, setelah header)
+        .filter(({ r }) => r[0] && r[1] && (isAktif ? r[3] : r[2]))
+        .map(({ r, _rowIndex }) => {
           const fileId = isAktif ? extractFileId(r[3]) : extractFileId(r[2]);
           return {
             nama: r[0],
@@ -100,7 +103,8 @@ export default async function handler(req, res) {
             link: fileId
               ? `https://drive.google.com/file/d/${fileId}/preview`
               : "#",
-            tahun: isAktif ? "" : (r[3] || "")
+            tahun: isAktif ? "" : (r[3] || ""),
+            _rowIndex
           };
         });
     }

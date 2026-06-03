@@ -160,7 +160,7 @@ if (rows.length > 8) {
           <td>${r.nama_himpunan}</td>
           <td>${r.hari_tanggal}</td>
           <td><a class="link" href="${r.link}" target="_blank">Lihat</a>
-          <button onclick="hapusData(${i + 1}, '${r.link}')" class="btn-delete">Hapus</button>
+          <button onclick="hapusData(${r._rowIndex}, '${r.link}')" class="btn-delete">Hapus</button>
           </td>
         </tr>
       `).join("");
@@ -171,7 +171,7 @@ if (rows.length > 8) {
           <td>${r.nama}</td>
           <td>${r.nim}</td>
           <td><a class="link" href="${r.link}" target="_blank">Lihat</a>
-          <button onclick="hapusData(${i + 1}, '${r.link}')" class="btn-delete">Hapus</button>
+          <button onclick="hapusData(${r._rowIndex}, '${r.link}')" class="btn-delete">Hapus</button>
           </td>
           ${jenisWithYear.includes(currentJenis) ? `<td>${r.tahun || "-"}</td>` : ""}
         </tr>
