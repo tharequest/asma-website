@@ -139,12 +139,10 @@ export default async function handler(req, res) {
       const link = `https://drive.google.com/file/d/${up.data.id}/view`;
 
       // Simpan ke sheet: nama_himpunan | hari_tanggal | pukul | tempat | link
-      // FIX: INSERT_ROWS agar setiap write dapat baris baru sendiri (tidak overwrite)
       await sheets.spreadsheets.values.append({
         spreadsheetId: process.env.GOOGLE_SHEET_ID,
         range: `${jenis}!A:E`,
         valueInputOption: "USER_ENTERED",
-        insertDataOption: "INSERT_ROWS",
         requestBody: { values: [[nama_himpunan, hari_tanggal, pukul, tempat, link]] }
       });
 
@@ -214,12 +212,10 @@ export default async function handler(req, res) {
         ? [nama, nim, link, tahun]
         : [nama, nim, link];
 
-    // FIX: INSERT_ROWS agar setiap write dapat baris baru sendiri (tidak overwrite)
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
       range: `${jenis}!A:D`,
       valueInputOption: "USER_ENTERED",
-      insertDataOption: "INSERT_ROWS",
       requestBody: { values: [row] }
     });
 
